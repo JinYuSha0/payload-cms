@@ -26,6 +26,31 @@ const getRelationshipID = (value: unknown): number | string | null => {
   return null
 }
 
+const listNonLeafCategoryIDs = async (req: Parameters<NonNullable<CollectionConfig['hooks']>['beforeValidate'][number]>[0]['req']) => {
+  const { docs } = await req.payload.find({
+    collection: 'categories',
+    where: {
+      category: {
+        exists: true,
+      },
+    },
+    draft: true,
+    depth: 0,
+    pagination: false,
+    req,
+  })
+
+  const ids = new Set<number | string>()
+  for (const doc of docs) {
+    const id = getRelationshipID((doc as { category?: unknown }).category)
+    if (id != null) {
+      ids.add(id)
+    }
+  }
+
+  return [...ids]
+}
+
 export const Productions: CollectionConfig = {
   slug: 'productions',
   admin: {
@@ -107,6 +132,18 @@ export const Productions: CollectionConfig = {
       name: 'leaf_category',
       type: 'relationship',
       relationTo: 'categories',
+      filterOptions: async ({ req }) => {
+        const nonLeafIDs = await listNonLeafCategoryIDs(req)
+        if (nonLeafIDs.length === 0) {
+          return true
+        }
+
+        return {
+          id: {
+            not_in: nonLeafIDs,
+          },
+        }
+      },
       admin: {
         description: '只能选择叶分类',
       },
