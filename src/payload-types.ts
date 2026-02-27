@@ -69,15 +69,24 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    categories: Category;
+    productions: Production;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    categories: {
+      categories: 'categories';
+      productions: 'productions';
+    };
+  };
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    productions: ProductionsSelect<false> | ProductionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -86,10 +95,16 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'zh') | ('en' | 'zh')[];
+  globals: {
+    'contact-information': ContactInformation;
+    'receive-email': ReceiveEmail;
+  };
+  globalsSelect: {
+    'contact-information': ContactInformationSelect<false> | ContactInformationSelect<true>;
+    'receive-email': ReceiveEmailSelect<false> | ReceiveEmailSelect<true>;
+  };
+  locale: 'en' | 'zh';
   user: User;
   jobs: {
     tasks: unknown;
@@ -158,6 +173,48 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  name: string;
+  category?: (number | null) | Category;
+  categories?: {
+    docs?: (number | Category)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  picture?: (number | null) | Media;
+  sortOrder?: number | null;
+  productions?: {
+    docs?: (number | Production)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productions".
+ */
+export interface Production {
+  id: number;
+  name: string;
+  picture?: (number | Media)[] | null;
+  content?: string | null;
+  /**
+   * 只能选择叶分类
+   */
+  leaf_category?: (number | null) | Category;
+  sortOrder?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -187,6 +244,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'productions';
+        value: number | Production;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -270,6 +335,35 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  categories?: T;
+  picture?: T;
+  sortOrder?: T;
+  productions?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "productions_select".
+ */
+export interface ProductionsSelect<T extends boolean = true> {
+  name?: T;
+  picture?: T;
+  content?: T;
+  leaf_category?: T;
+  sortOrder?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -307,6 +401,54 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-information".
+ */
+export interface ContactInformation {
+  id: number;
+  phone?: string | null;
+  email?: string | null;
+  address?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "receive-email".
+ */
+export interface ReceiveEmail {
+  id: number;
+  email?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-information_select".
+ */
+export interface ContactInformationSelect<T extends boolean = true> {
+  phone?: T;
+  email?: T;
+  address?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "receive-email_select".
+ */
+export interface ReceiveEmailSelect<T extends boolean = true> {
+  email?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
