@@ -11,6 +11,11 @@ compatibility_flags = [
   "global_fetch_strictly_public",
 ]
 
+[vars]
+MEDIA_PUBLIC_ORIGIN = "https://img.viteedge.com"
+MEDIA_THUMBNAIL_PREFIX = "thumbnail_"
+MEDIA_THUMBNAIL_RESIZE_OPTS = "width=480,fit=cover,quality=85,format=auto"
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"

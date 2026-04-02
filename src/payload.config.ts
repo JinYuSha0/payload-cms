@@ -5,7 +5,7 @@ import { EXPERIMENTAL_TableFeature, lexicalEditor } from '@payloadcms/richtext-l
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
-import { GetPlatformProxyOptions } from 'wrangler'
+import type { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 
 import { Users } from './collections/Users'
@@ -14,6 +14,7 @@ import { Categories } from './collections/Categories'
 import { Productions } from './collections/Productions'
 import { ContactInformation } from './globals/ContactInformation'
 import { ReceiveEmail } from './globals/ReceiveEmail'
+import { setRuntimeR2Bucket } from './lib/runtime-bindings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,6 +22,8 @@ const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(valu
 
 const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
 const isProduction = process.env.NODE_ENV === 'production'
+const isNextBuild = process.env.NEXT_PHASE === 'phase-production-build'
+const isCloudflareWorkerRuntime = 'WebSocketPair' in globalThis
 
 const createLog =
   (level: string, fn: typeof console.log) => (objOrMsg: object | string, msg?: string) => {
@@ -43,9 +46,11 @@ const cloudflareLogger = {
 } as any // Use PayloadLogger type when it's exported
 
 const cloudflare =
-  isCLI || !isProduction
+  isCLI || isNextBuild || (!isProduction && !isCloudflareWorkerRuntime)
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
+
+setRuntimeR2Bucket(cloudflare.env.R2)
 
 export default buildConfig({
   admin: {
@@ -83,7 +88,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        remoteBindings: isProduction,
+        remoteBindings: isProduction && !isNextBuild,
       } satisfies GetPlatformProxyOptions),
   )
 }
