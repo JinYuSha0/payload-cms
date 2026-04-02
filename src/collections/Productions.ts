@@ -26,7 +26,9 @@ const getRelationshipID = (value: unknown): number | string | null => {
   return null
 }
 
-const listNonLeafCategoryIDs = async (req: Parameters<NonNullable<CollectionConfig['hooks']>['beforeValidate'][number]>[0]['req']) => {
+const listNonLeafCategoryIDs = async (
+  req: Parameters<NonNullable<CollectionConfig['hooks']>['beforeValidate'][number]>[0]['req'],
+) => {
   const { docs } = await req.payload.find({
     collection: 'categories',
     where: {
@@ -125,7 +127,7 @@ export const Productions: CollectionConfig = {
     },
     {
       name: 'content',
-      type: 'textarea',
+      type: 'richText',
       localized: true,
     },
     {
