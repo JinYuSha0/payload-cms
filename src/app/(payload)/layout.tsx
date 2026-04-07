@@ -10,7 +10,7 @@ import { importMap } from './admin/importMap.js'
 import './custom.scss'
 
 type Args = {
-  children: React.ReactNode
+  children: any
 }
 
 const serverFunction: ServerFunctionClient = async function (args) {

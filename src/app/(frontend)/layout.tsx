@@ -2,11 +2,11 @@ import React from 'react'
 import './styles.css'
 
 export const metadata = {
-  description: 'A blank template using Payload in a Next.js app.',
-  title: 'Payload Blank Template',
+  description: 'Kitchen utensils frontend powered by Payload CMS and Next.js SSR.',
+  title: 'Kitchen Utensils',
 }
 
-export default async function RootLayout(props: { children: React.ReactNode }) {
+export default function RootLayout(props: { children: any }) {
   const { children } = props
 
   return (
