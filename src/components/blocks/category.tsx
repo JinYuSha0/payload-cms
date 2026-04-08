@@ -89,9 +89,15 @@ const Category = ({ data }: { data: CategoryPageData }) => {
                           {production.picture && production.picture.length > 0 ? (
                             <>
                               <img
-                                src={production.picture[0].formats?.small?.url || production.picture[0].url}
+                                src={production.picture[0].url}
                                 alt={production.name}
                                 className="w-full h-full object-cover"
+                                onError={(event) => {
+                                  const img = event.currentTarget
+                                  const fallback = production.picture?.[0]?.url
+                                  if (!fallback || img.src === fallback) return
+                                  img.src = fallback
+                                }}
                               />
                               <div className="absolute inset-0 bg-linear-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </>

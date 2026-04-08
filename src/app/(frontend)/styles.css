@@ -137,3 +137,53 @@ code {
 .heti table {
   margin-inline-start: unset !important;
 }
+
+.frontend-content {
+  color: var(--foreground);
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.frontend-content table {
+  width: max-content;
+  min-width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+
+.frontend-content th,
+.frontend-content td {
+  border: 1px solid var(--border);
+  padding: 0.625rem;
+  vertical-align: top;
+}
+
+.frontend-content img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+
+.frontend-content h1,
+.frontend-content h2,
+.frontend-content h3,
+.frontend-content h4 {
+  scroll-margin-top: 6rem;
+}
+
+.frontend-content p,
+.frontend-content li,
+.frontend-content td,
+.frontend-content th {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .frontend-content {
+    font-size: 0.95rem;
+  }
+}

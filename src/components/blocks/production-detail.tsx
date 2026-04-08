@@ -33,6 +33,26 @@ const faqData: FAQItem[] = [
     answer:
       'Do not use this product in a microwave for heating. Stainless steel material will create sparks in a microwave, which may cause danger.',
   },
+  {
+    question: 'How to maintain the product to extend its lifespan?',
+    answer:
+      'We recommend cleaning and drying promptly after use. Avoid using sharp objects to scrape the surface. Regularly check the product condition, and replace it promptly if damage is found. Store in a dry environment.',
+  },
+  {
+    question: 'What sizes are available for the product?',
+    answer:
+      'We offer multiple size specifications to meet the needs of different households. For detailed size information, please refer to the product specifications or contact customer service.',
+  },
+  {
+    question: 'How long after purchase can I receive the goods?',
+    answer:
+      'Usually after order confirmation, we will ship within 1-3 business days. Specific delivery time depends on your address, generally 5-7 business days for delivery.',
+  },
+  {
+    question: 'Does the product support returns and exchanges?',
+    answer:
+      'We offer a 7-day no-questions-asked return and exchange service. If the product has quality issues or does not match the description, we will cover the return shipping costs. Please inspect the product carefully after receipt.',
+  },
 ]
 
 const ProductionDetail = ({ data }: { data: ProductionPageData }) => {
@@ -140,7 +160,7 @@ const ProductionDetail = ({ data }: { data: ProductionPageData }) => {
           <Separator className="mb-8" />
 
           <div
-            className="heti !max-w-none [&_figure]:!text-left"
+            className="frontend-content prose prose-neutral max-w-none"
             dangerouslySetInnerHTML={{ __html: production.content || '' }}
           />
         </article>

@@ -1,14 +1,14 @@
--- Generated from Strapi CSV data under .migrate/rds_data
--- Scope: categories + leaf_categories only
--- Source counts: 5 categories, 12 leaf_categories, 17 total category nodes
+-- Generated from dump2.sql (PostgreSQL)
+-- Scope: categories + leaf categories
+-- Source counts: 5 categories, 16 leaf categories, 21 total category nodes
 -- Notes:
--- 1) IDs are remapped to 1-based contiguous integers.
--- 2) Only valid picture relations found in current CSV snapshot are imported.
---    (e.g. related_id 283 -> new category id 16 -> file_id 172 -> media.id 70)
--- 3) Category import does not hard-require media rows to exist; picture is patched later if available.
--- 4) Intentionally no explicit BEGIN/COMMIT for Cloudflare SQL execution compatibility.
+-- 1) IDs keep Strapi source IDs to preserve production/category links.
+-- 2) categories + leaf_categories are merged into Payload `categories` tree.
+-- 3) picture relation is restored from files_related_mph for both category types.
+-- 4) Includes versions tables used by Payload drafts/admin.
+-- 5) Intentionally no explicit BEGIN/COMMIT for Cloudflare D1 execution compatibility.
 
--- 1) Upsert category tree into Payload `categories`
+-- 1) Upsert categories tree
 INSERT INTO categories (
   id,
   category_id,
@@ -18,23 +18,27 @@ INSERT INTO categories (
   _status
 )
 VALUES
-  (1, NULL, 0, '2025-11-12T06:21:35.881Z', '2025-11-12T06:21:35.881Z', 'published'),
-  (2, 1, 0, '2025-11-12T06:33:28.816Z', '2025-11-12T06:33:28.816Z', 'published'),
-  (3, 2, 0, '2025-11-12T06:34:02.328Z', '2025-11-12T06:34:02.328Z', 'published'),
-  (4, 1, 0, '2025-11-13T03:17:42.199Z', '2025-11-13T03:17:42.199Z', 'published'),
-  (5, 1, 0, '2025-11-14T02:04:43.728Z', '2025-11-14T02:04:43.728Z', 'published'),
-  (6, 3, 0, '2025-11-12T06:39:33.270Z', '2025-11-12T06:35:05.536Z', 'published'),
-  (7, 3, 0, '2025-11-12T06:35:55.352Z', '2025-11-12T06:35:55.352Z', 'published'),
-  (8, 3, 0, '2025-11-12T06:38:52.179Z', '2025-11-12T06:36:28.982Z', 'published'),
-  (9, 3, 0, '2025-11-12T06:39:02.133Z', '2025-11-12T06:37:45.443Z', 'published'),
-  (10, 1, 0, '2025-11-12T06:40:22.801Z', '2025-11-12T06:40:22.801Z', 'published'),
-  (11, 2, 0, '2025-11-13T03:12:43.925Z', '2025-11-13T03:12:43.925Z', 'published'),
-  (12, 4, 0, '2025-11-13T03:18:11.185Z', '2025-11-13T03:18:11.185Z', 'published'),
-  (13, 4, 0, '2025-11-13T03:18:31.916Z', '2025-11-13T03:18:31.916Z', 'published'),
-  (14, 1, 0, '2025-11-13T04:08:24.094Z', '2025-11-13T04:08:24.094Z', 'published'),
-  (15, 5, 0, '2025-11-14T02:05:23.825Z', '2025-11-14T02:05:23.825Z', 'published'),
-  (16, 1, 0, '2025-11-15T02:25:01.389Z', '2025-11-15T02:25:01.389Z', 'published'),
-  (17, 1, 1, '2025-11-17T23:35:56.229Z', '2025-11-17T23:33:39.155Z', 'published')
+  (2, 6, 0, '2025-11-22T04:40:45.935Z', '2025-11-18T12:10:34.475Z', 'published'),
+  (3, NULL, 1, '2025-11-22T04:41:49.665Z', '2025-11-20T03:57:46.445Z', 'published'),
+  (4, NULL, 2, '2025-11-24T04:15:30.25Z', '2025-11-22T04:39:32.734Z', 'published'),
+  (5, NULL, 3, '2025-11-22T04:42:27.3Z', '2025-11-22T04:39:53.437Z', 'published'),
+  (6, NULL, 4, '2025-11-22T04:42:41.862Z', '2025-11-22T04:40:17.643Z', 'published'),
+  (7, 3, 0, '2025-11-22T04:43:26.291Z', '2025-11-18T11:53:07.425Z', 'published'),
+  (8, 3, 0, '2025-11-20T02:14:44.92Z', '2025-11-20T01:58:56.043Z', 'published'),
+  (9, 3, 0, '2025-11-20T03:58:51.22Z', '2025-11-20T03:58:51.22Z', 'published'),
+  (10, 4, 0, '2025-11-24T06:06:41.67Z', '2025-11-24T06:06:41.67Z', 'published'),
+  (11, 4, 0, '2025-11-24T06:07:24.11Z', '2025-11-24T06:07:24.11Z', 'published'),
+  (12, 6, 0, '2025-11-24T06:50:22.909Z', '2025-11-24T06:50:22.909Z', 'published'),
+  (13, 6, 0, '2025-11-27T01:54:15.879Z', '2025-11-24T06:51:31.704Z', 'published'),
+  (14, 5, 0, '2025-11-25T07:12:23.363Z', '2025-11-25T07:12:23.363Z', 'published'),
+  (15, 5, 0, '2025-11-25T07:13:30.123Z', '2025-11-25T07:13:30.123Z', 'published'),
+  (16, 6, 0, '2025-11-27T01:52:15.562Z', '2025-11-27T01:52:15.562Z', 'published'),
+  (17, 6, 0, '2025-11-27T01:54:44.475Z', '2025-11-27T01:54:44.475Z', 'published'),
+  (19, 6, 0, '2025-11-27T01:57:28.222Z', '2025-11-27T01:57:28.222Z', 'published'),
+  (20, 6, 0, '2025-11-27T01:57:59.433Z', '2025-11-27T01:57:59.433Z', 'published'),
+  (21, 3, 0, '2025-11-27T07:37:14.35Z', '2025-11-27T07:10:53.51Z', 'published'),
+  (22, 6, 0, '2025-12-01T06:25:34.983Z', '2025-11-28T01:06:16.653Z', 'published'),
+  (23, 3, 0, '2025-12-01T09:03:47.769Z', '2025-12-01T09:03:47.769Z', 'published')
 ON CONFLICT(id) DO UPDATE SET
   category_id = excluded.category_id,
   sort_order = excluded.sort_order,
@@ -42,7 +46,7 @@ ON CONFLICT(id) DO UPDATE SET
   created_at = excluded.created_at,
   _status = excluded._status;
 
--- 2) Upsert localized fields into `categories_locales` (only en exists in source CSV)
+-- 2) Upsert categories_locales
 INSERT INTO categories_locales (
   name,
   picture_id,
@@ -51,37 +55,34 @@ INSERT INTO categories_locales (
   _parent_id
 )
 VALUES
-  ('Cooking Equipment', NULL, 1, 'en', 1),
-  ('Coffee and Chocolate', NULL, 2, 'en', 2),
-  ('Chocolate Machines', NULL, 3, 'en', 3),
-  ('Commercial Module', NULL, 4, 'en', 4),
-  ('Donut Machine', NULL, 5, 'en', 5),
-  ('Chocolate Fountain Machine', NULL, 6, 'en', 6),
-  ('Chocolate Coating Machine', NULL, 7, 'en', 7),
-  ('Chocolate Filling Machine', NULL, 8, 'en', 8),
-  ('Chocolate Heat Preservation Machine', NULL, 9, 'en', 9),
-  ('Chicken Rotisserie Ovens ', NULL, 10, 'en', 10),
-  ('Coffee Machine', NULL, 11, 'en', 11),
-  ('900 Series', NULL, 12, 'en', 12),
-  ('700 Series', NULL, 13, 'en', 13),
-  ('Commercial Griddles', NULL, 14, 'en', 14),
-  ('Donut Robot', NULL, 15, 'en', 15),
-  ('Candy Floss Machines', NULL, 16, 'en', 16),
-  ('Commercial Combination Oven', NULL, 17, 'en', 17)
+  ('Doughnut Machine', NULL, 2, 'en', 2),
+  ('Commercial Range', NULL, 3, 'en', 3),
+  ('Modular Range', NULL, 4, 'en', 4),
+  ('Bakery Range', NULL, 5, 'en', 5),
+  ('Snack Range', NULL, 6, 'en', 6),
+  ('Commercial Combination Oven', NULL, 7, 'en', 7),
+  ('Commercial Gas Equipment', NULL, 8, 'en', 8),
+  ('Commercial Electric Equipment', NULL, 9, 'en', 9),
+  ('Floorstanding Modular', NULL, 10, 'en', 10),
+  ('Countertop Modular', NULL, 11, 'en', 11),
+  ('Waffle Maker', NULL, 12, 'en', 12),
+  ('Juice Warmer', NULL, 13, 'en', 13),
+  ('Conveyor Toaster', NULL, 14, 'en', 14),
+  ('Slice Toaster', NULL, 15, 'en', 15),
+  ('Panini Pressing grill', NULL, 16, 'en', 16),
+  ('Chip Warmer', NULL, 17, 'en', 17),
+  ('Candy Floss Machine', NULL, 19, 'en', 19),
+  ('Popcorn Machine', NULL, 20, 'en', 20),
+  ('Countertop Griddle', NULL, 21, 'en', 21),
+  ('Crepe Machine', 404, 22, 'en', 22),
+  ('Commercial Convection Oven', NULL, 23, 'en', 23)
 ON CONFLICT(id) DO UPDATE SET
   name = excluded.name,
   picture_id = excluded.picture_id,
   _locale = excluded._locale,
   _parent_id = excluded._parent_id;
 
--- 3) Patch known picture relation when corresponding media has been imported.
-UPDATE categories_locales
-SET picture_id = 70
-WHERE _parent_id = 16
-  AND _locale = 'en'
-  AND EXISTS (SELECT 1 FROM media WHERE id = 70);
-
--- 4) Upsert category versions (required for Payload admin list with draft=true)
+-- 3) Upsert _categories_v
 INSERT INTO _categories_v (
   id,
   parent_id,
@@ -97,23 +98,27 @@ INSERT INTO _categories_v (
   latest
 )
 VALUES
-  (1, 1, NULL, 0, '2025-11-12T06:21:35.881Z', '2025-11-12T06:21:35.881Z', 'published', '2025-11-12T06:21:35.881Z', '2025-11-12T06:21:35.881Z', NULL, 'en', 1),
-  (2, 2, 1, 0, '2025-11-12T06:33:28.816Z', '2025-11-12T06:33:28.816Z', 'published', '2025-11-12T06:33:28.816Z', '2025-11-12T06:33:28.816Z', NULL, 'en', 1),
-  (3, 3, 2, 0, '2025-11-12T06:34:02.328Z', '2025-11-12T06:34:02.328Z', 'published', '2025-11-12T06:34:02.328Z', '2025-11-12T06:34:02.328Z', NULL, 'en', 1),
-  (4, 4, 1, 0, '2025-11-13T03:17:42.199Z', '2025-11-13T03:17:42.199Z', 'published', '2025-11-13T03:17:42.199Z', '2025-11-13T03:17:42.199Z', NULL, 'en', 1),
-  (5, 5, 1, 0, '2025-11-14T02:04:43.728Z', '2025-11-14T02:04:43.728Z', 'published', '2025-11-14T02:04:43.728Z', '2025-11-14T02:04:43.728Z', NULL, 'en', 1),
-  (6, 6, 3, 0, '2025-11-12T06:39:33.270Z', '2025-11-12T06:35:05.536Z', 'published', '2025-11-12T06:35:05.536Z', '2025-11-12T06:39:33.270Z', NULL, 'en', 1),
-  (7, 7, 3, 0, '2025-11-12T06:35:55.352Z', '2025-11-12T06:35:55.352Z', 'published', '2025-11-12T06:35:55.352Z', '2025-11-12T06:35:55.352Z', NULL, 'en', 1),
-  (8, 8, 3, 0, '2025-11-12T06:38:52.179Z', '2025-11-12T06:36:28.982Z', 'published', '2025-11-12T06:36:28.982Z', '2025-11-12T06:38:52.179Z', NULL, 'en', 1),
-  (9, 9, 3, 0, '2025-11-12T06:39:02.133Z', '2025-11-12T06:37:45.443Z', 'published', '2025-11-12T06:37:45.443Z', '2025-11-12T06:39:02.133Z', NULL, 'en', 1),
-  (10, 10, 1, 0, '2025-11-12T06:40:22.801Z', '2025-11-12T06:40:22.801Z', 'published', '2025-11-12T06:40:22.801Z', '2025-11-12T06:40:22.801Z', NULL, 'en', 1),
-  (11, 11, 2, 0, '2025-11-13T03:12:43.925Z', '2025-11-13T03:12:43.925Z', 'published', '2025-11-13T03:12:43.925Z', '2025-11-13T03:12:43.925Z', NULL, 'en', 1),
-  (12, 12, 4, 0, '2025-11-13T03:18:11.185Z', '2025-11-13T03:18:11.185Z', 'published', '2025-11-13T03:18:11.185Z', '2025-11-13T03:18:11.185Z', NULL, 'en', 1),
-  (13, 13, 4, 0, '2025-11-13T03:18:31.916Z', '2025-11-13T03:18:31.916Z', 'published', '2025-11-13T03:18:31.916Z', '2025-11-13T03:18:31.916Z', NULL, 'en', 1),
-  (14, 14, 1, 0, '2025-11-13T04:08:24.094Z', '2025-11-13T04:08:24.094Z', 'published', '2025-11-13T04:08:24.094Z', '2025-11-13T04:08:24.094Z', NULL, 'en', 1),
-  (15, 15, 5, 0, '2025-11-14T02:05:23.825Z', '2025-11-14T02:05:23.825Z', 'published', '2025-11-14T02:05:23.825Z', '2025-11-14T02:05:23.825Z', NULL, 'en', 1),
-  (16, 16, 1, 0, '2025-11-15T02:25:01.389Z', '2025-11-15T02:25:01.389Z', 'published', '2025-11-15T02:25:01.389Z', '2025-11-15T02:25:01.389Z', NULL, 'en', 1),
-  (17, 17, 1, 1, '2025-11-17T23:35:56.229Z', '2025-11-17T23:33:39.155Z', 'published', '2025-11-17T23:33:39.155Z', '2025-11-17T23:35:56.229Z', NULL, 'en', 1)
+  (2, 2, 6, 0, '2025-11-22T04:40:45.935Z', '2025-11-18T12:10:34.475Z', 'published', '2025-11-18T12:10:34.475Z', '2025-11-22T04:40:45.935Z', NULL, 'en', 1),
+  (3, 3, NULL, 1, '2025-11-22T04:41:49.665Z', '2025-11-20T03:57:46.445Z', 'published', '2025-11-20T03:57:46.445Z', '2025-11-22T04:41:49.665Z', NULL, 'en', 1),
+  (4, 4, NULL, 2, '2025-11-24T04:15:30.25Z', '2025-11-22T04:39:32.734Z', 'published', '2025-11-22T04:39:32.734Z', '2025-11-24T04:15:30.25Z', NULL, 'en', 1),
+  (5, 5, NULL, 3, '2025-11-22T04:42:27.3Z', '2025-11-22T04:39:53.437Z', 'published', '2025-11-22T04:39:53.437Z', '2025-11-22T04:42:27.3Z', NULL, 'en', 1),
+  (6, 6, NULL, 4, '2025-11-22T04:42:41.862Z', '2025-11-22T04:40:17.643Z', 'published', '2025-11-22T04:40:17.643Z', '2025-11-22T04:42:41.862Z', NULL, 'en', 1),
+  (7, 7, 3, 0, '2025-11-22T04:43:26.291Z', '2025-11-18T11:53:07.425Z', 'published', '2025-11-18T11:53:07.425Z', '2025-11-22T04:43:26.291Z', NULL, 'en', 1),
+  (8, 8, 3, 0, '2025-11-20T02:14:44.92Z', '2025-11-20T01:58:56.043Z', 'published', '2025-11-20T01:58:56.043Z', '2025-11-20T02:14:44.92Z', NULL, 'en', 1),
+  (9, 9, 3, 0, '2025-11-20T03:58:51.22Z', '2025-11-20T03:58:51.22Z', 'published', '2025-11-20T03:58:51.22Z', '2025-11-20T03:58:51.22Z', NULL, 'en', 1),
+  (10, 10, 4, 0, '2025-11-24T06:06:41.67Z', '2025-11-24T06:06:41.67Z', 'published', '2025-11-24T06:06:41.67Z', '2025-11-24T06:06:41.67Z', NULL, 'en', 1),
+  (11, 11, 4, 0, '2025-11-24T06:07:24.11Z', '2025-11-24T06:07:24.11Z', 'published', '2025-11-24T06:07:24.11Z', '2025-11-24T06:07:24.11Z', NULL, 'en', 1),
+  (12, 12, 6, 0, '2025-11-24T06:50:22.909Z', '2025-11-24T06:50:22.909Z', 'published', '2025-11-24T06:50:22.909Z', '2025-11-24T06:50:22.909Z', NULL, 'en', 1),
+  (13, 13, 6, 0, '2025-11-27T01:54:15.879Z', '2025-11-24T06:51:31.704Z', 'published', '2025-11-24T06:51:31.704Z', '2025-11-27T01:54:15.879Z', NULL, 'en', 1),
+  (14, 14, 5, 0, '2025-11-25T07:12:23.363Z', '2025-11-25T07:12:23.363Z', 'published', '2025-11-25T07:12:23.363Z', '2025-11-25T07:12:23.363Z', NULL, 'en', 1),
+  (15, 15, 5, 0, '2025-11-25T07:13:30.123Z', '2025-11-25T07:13:30.123Z', 'published', '2025-11-25T07:13:30.123Z', '2025-11-25T07:13:30.123Z', NULL, 'en', 1),
+  (16, 16, 6, 0, '2025-11-27T01:52:15.562Z', '2025-11-27T01:52:15.562Z', 'published', '2025-11-27T01:52:15.562Z', '2025-11-27T01:52:15.562Z', NULL, 'en', 1),
+  (17, 17, 6, 0, '2025-11-27T01:54:44.475Z', '2025-11-27T01:54:44.475Z', 'published', '2025-11-27T01:54:44.475Z', '2025-11-27T01:54:44.475Z', NULL, 'en', 1),
+  (19, 19, 6, 0, '2025-11-27T01:57:28.222Z', '2025-11-27T01:57:28.222Z', 'published', '2025-11-27T01:57:28.222Z', '2025-11-27T01:57:28.222Z', NULL, 'en', 1),
+  (20, 20, 6, 0, '2025-11-27T01:57:59.433Z', '2025-11-27T01:57:59.433Z', 'published', '2025-11-27T01:57:59.433Z', '2025-11-27T01:57:59.433Z', NULL, 'en', 1),
+  (21, 21, 3, 0, '2025-11-27T07:37:14.35Z', '2025-11-27T07:10:53.51Z', 'published', '2025-11-27T07:10:53.51Z', '2025-11-27T07:37:14.35Z', NULL, 'en', 1),
+  (22, 22, 6, 0, '2025-12-01T06:25:34.983Z', '2025-11-28T01:06:16.653Z', 'published', '2025-11-28T01:06:16.653Z', '2025-12-01T06:25:34.983Z', NULL, 'en', 1),
+  (23, 23, 3, 0, '2025-12-01T09:03:47.769Z', '2025-12-01T09:03:47.769Z', 'published', '2025-12-01T09:03:47.769Z', '2025-12-01T09:03:47.769Z', NULL, 'en', 1)
 ON CONFLICT(id) DO UPDATE SET
   parent_id = excluded.parent_id,
   version_category_id = excluded.version_category_id,
@@ -127,7 +132,7 @@ ON CONFLICT(id) DO UPDATE SET
   published_locale = excluded.published_locale,
   latest = excluded.latest;
 
--- 5) Upsert localized version fields
+-- 4) Upsert _categories_v_locales
 INSERT INTO _categories_v_locales (
   version_name,
   version_picture_id,
@@ -136,32 +141,30 @@ INSERT INTO _categories_v_locales (
   _parent_id
 )
 VALUES
-  ('Cooking Equipment', NULL, 1, 'en', 1),
-  ('Coffee and Chocolate', NULL, 2, 'en', 2),
-  ('Chocolate Machines', NULL, 3, 'en', 3),
-  ('Commercial Module', NULL, 4, 'en', 4),
-  ('Donut Machine', NULL, 5, 'en', 5),
-  ('Chocolate Fountain Machine', NULL, 6, 'en', 6),
-  ('Chocolate Coating Machine', NULL, 7, 'en', 7),
-  ('Chocolate Filling Machine', NULL, 8, 'en', 8),
-  ('Chocolate Heat Preservation Machine', NULL, 9, 'en', 9),
-  ('Chicken Rotisserie Ovens ', NULL, 10, 'en', 10),
-  ('Coffee Machine', NULL, 11, 'en', 11),
-  ('900 Series', NULL, 12, 'en', 12),
-  ('700 Series', NULL, 13, 'en', 13),
-  ('Commercial Griddles', NULL, 14, 'en', 14),
-  ('Donut Robot', NULL, 15, 'en', 15),
-  ('Candy Floss Machines', NULL, 16, 'en', 16),
-  ('Commercial Combination Oven', NULL, 17, 'en', 17)
+  ('Doughnut Machine', NULL, 2, 'en', 2),
+  ('Commercial Range', NULL, 3, 'en', 3),
+  ('Modular Range', NULL, 4, 'en', 4),
+  ('Bakery Range', NULL, 5, 'en', 5),
+  ('Snack Range', NULL, 6, 'en', 6),
+  ('Commercial Combination Oven', NULL, 7, 'en', 7),
+  ('Commercial Gas Equipment', NULL, 8, 'en', 8),
+  ('Commercial Electric Equipment', NULL, 9, 'en', 9),
+  ('Floorstanding Modular', NULL, 10, 'en', 10),
+  ('Countertop Modular', NULL, 11, 'en', 11),
+  ('Waffle Maker', NULL, 12, 'en', 12),
+  ('Juice Warmer', NULL, 13, 'en', 13),
+  ('Conveyor Toaster', NULL, 14, 'en', 14),
+  ('Slice Toaster', NULL, 15, 'en', 15),
+  ('Panini Pressing grill', NULL, 16, 'en', 16),
+  ('Chip Warmer', NULL, 17, 'en', 17),
+  ('Candy Floss Machine', NULL, 19, 'en', 19),
+  ('Popcorn Machine', NULL, 20, 'en', 20),
+  ('Countertop Griddle', NULL, 21, 'en', 21),
+  ('Crepe Machine', 404, 22, 'en', 22),
+  ('Commercial Convection Oven', NULL, 23, 'en', 23)
 ON CONFLICT(id) DO UPDATE SET
   version_name = excluded.version_name,
   version_picture_id = excluded.version_picture_id,
   _locale = excluded._locale,
   _parent_id = excluded._parent_id;
 
--- 6) Patch localized version picture relation when media exists.
-UPDATE _categories_v_locales
-SET version_picture_id = 70
-WHERE _parent_id = 16
-  AND _locale = 'en'
-  AND EXISTS (SELECT 1 FROM media WHERE id = 70);

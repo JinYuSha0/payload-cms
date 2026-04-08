@@ -5,6 +5,10 @@ export type SiteVariant = 'xinzhuolian' | 'icookingtech'
 export type NavCategory = {
   documentId: string
   name: string
+  children: Array<{
+    documentId: string
+    name: string
+  }>
 }
 
 export type ContactInformation = {

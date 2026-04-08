@@ -16,9 +16,15 @@ const Articles = ({ products }: { products: Production[] }) => {
               <div className="w-full aspect-video bg-muted rounded-t-lg overflow-hidden">
                 {product.picture && product.picture.length > 0 && (
                   <img
-                    src={product.picture[0].formats?.small?.url || product.picture[0].url}
+                    src={product.picture[0].url}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onError={(event) => {
+                      const img = event.currentTarget
+                      const fallback = product.picture?.[0]?.url
+                      if (!fallback || img.src === fallback) return
+                      img.src = fallback
+                    }}
                   />
                 )}
               </div>

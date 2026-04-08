@@ -94,8 +94,9 @@ const toPicture = (mediaValue: unknown): Picture | null => {
   const media = mediaValue as Media & { documentId?: string }
   const fullURL = asNonEmptyString(media.url)
   const thumbnailURL = asNonEmptyString(media.thumbnailURL) || fullURL
+  const displayURL = fullURL || thumbnailURL
 
-  if (!fullURL && !thumbnailURL) {
+  if (!displayURL) {
     return null
   }
 
@@ -107,15 +108,15 @@ const toPicture = (mediaValue: unknown): Picture | null => {
     caption: asNonEmptyString(media.alt),
     width: media.width || undefined,
     height: media.height || undefined,
-    url: fullURL || thumbnailURL || '',
+    url: displayURL,
     formats: {
       small: {
-        url: thumbnailURL || fullURL || '',
+        url: displayURL,
         width: media.width || undefined,
         height: media.height || undefined,
       },
       thumbnail: {
-        url: thumbnailURL || fullURL || '',
+        url: displayURL,
         width: media.width || undefined,
         height: media.height || undefined,
       },
@@ -425,13 +426,16 @@ const buildBaseContext = async (
   categoryById: Map<number, CategoryDoc>
 }> => {
   const payload = await getPayload({ config: configPromise })
+  const locale = 'en' as const
 
   const [categoriesRes, productionsRes, contactInformationRes] = await Promise.all([
     payload.find({
       collection: 'categories',
       pagination: false,
       depth: 2,
-      draft: true,
+      draft: false,
+      locale,
+      fallbackLocale: locale,
       sort: 'sortOrder',
       limit: 0,
     }),
@@ -439,13 +443,17 @@ const buildBaseContext = async (
       collection: 'productions',
       pagination: false,
       depth: 2,
-      draft: true,
+      draft: false,
+      locale,
+      fallbackLocale: locale,
       sort: 'sortOrder',
       limit: 0,
     }),
     payload.findGlobal({
       slug: 'contact-information',
-      draft: true,
+      draft: false,
+      locale,
+      fallbackLocale: locale,
     }),
   ])
 
@@ -481,6 +489,14 @@ const buildBaseContext = async (
     .map((category) => ({
       documentId: getDocumentId(category),
       name: resolveLocalizedString(category.name),
+      children: (childrenByParent.get(category.id) || [])
+        .map((childId) => categoryById.get(childId))
+        .filter((child): child is CategoryDoc => Boolean(child))
+        .sort(bySortOrder)
+        .map((child) => ({
+          documentId: getDocumentId(child),
+          name: resolveLocalizedString(child.name),
+        })),
     }))
 
   const contactGlobal = contactInformationRes as unknown as Record<string, unknown>
