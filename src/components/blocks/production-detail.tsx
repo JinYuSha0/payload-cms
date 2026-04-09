@@ -9,7 +9,6 @@ import { FAQ, type FAQItem } from '@/components/blocks/faq'
 import { Card } from '@/components/ui/card'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
-import { icons } from '@/config/navbar'
 import type { ProductionPageData } from '@/frontend/types'
 
 const faqData: FAQItem[] = [
@@ -177,8 +176,7 @@ const ProductionDetail = ({ data }: { data: ProductionPageData }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {recommendedProductions.map((product, index) => {
-                const Icon = icons[index % icons.length]
+              {recommendedProductions.map((product) => {
                 const imageUrl = product.picture?.[0]?.url
                 const imageError = imageErrors[product.documentId] || false
 
@@ -205,14 +203,6 @@ const ProductionDetail = ({ data }: { data: ProductionPageData }) => {
                             </p>
                           </div>
                         )}
-                        <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-background/90 backdrop-blur-sm group-hover:bg-background transition-colors">
-                            <Icon className="h-4 w-4 text-primary" />
-                          </div>
-                          <div className="px-2 py-1 rounded-md bg-background/90 backdrop-blur-sm text-xs font-semibold text-foreground">
-                            {String(index + 1).padStart(2, '0')}
-                          </div>
-                        </div>
                       </div>
                       <div className="p-4 space-y-1">
                         <h3 className="text-base font-semibold tracking-tight group-hover:text-primary transition-colors line-clamp-2">
