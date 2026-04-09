@@ -10,10 +10,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { ContactInformation } from '@/frontend/types'
 
-const Contact = ({ contactInformation }: { contactInformation: ContactInformation }) => {
+  const Contact = ({ contactInformation }: { contactInformation: ContactInformation }) => {
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
+    const form = e.currentTarget
+    const formData = new FormData(form)
     const payload = Object.fromEntries(formData.entries())
 
     try {
@@ -30,7 +31,7 @@ const Contact = ({ contactInformation }: { contactInformation: ContactInformatio
       }
 
       alert('Thank you for contacting us!')
-      e.currentTarget.reset()
+      form.reset()
     } catch {
       alert('Failed to contact us')
     }
@@ -102,7 +103,7 @@ const Contact = ({ contactInformation }: { contactInformation: ContactInformatio
                       name="firstName"
                       required
                       minLength={1}
-                      maxLength={32}
+                      maxLength={64}
                       placeholder="First name"
                       id="firstName"
                       className="mt-1.5 md:mt-2 bg-white h-9 md:h-10 shadow-none text-sm md:text-base"
@@ -116,7 +117,7 @@ const Contact = ({ contactInformation }: { contactInformation: ContactInformatio
                       name="lastName"
                       required
                       minLength={1}
-                      maxLength={32}
+                      maxLength={64}
                       placeholder="Last name"
                       id="lastName"
                       className="mt-1.5 md:mt-2 bg-white h-9 md:h-10 shadow-none text-sm md:text-base"
@@ -130,7 +131,7 @@ const Contact = ({ contactInformation }: { contactInformation: ContactInformatio
                       name="email"
                       required
                       pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-                      maxLength={64}
+                      maxLength={128}
                       type="email"
                       placeholder="Email"
                       id="email"

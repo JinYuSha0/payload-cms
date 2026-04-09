@@ -12,6 +12,8 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
 import { Productions } from './collections/Productions'
+import { Contacts } from './collections/Contacts'
+import { Subscribers } from './collections/Subscribers'
 import { ContactInformation } from './globals/ContactInformation'
 import { ReceiveEmail } from './globals/ReceiveEmail'
 import { setRuntimeR2Bucket } from './lib/runtime-bindings'
@@ -59,7 +61,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Productions],
+  collections: [Users, Media, Categories, Productions, Contacts, Subscribers],
   globals: [ContactInformation, ReceiveEmail],
   localization: {
     locales: ['en', 'zh'],

@@ -24,7 +24,8 @@ const Footer = ({ siteVariant }: { siteVariant: SiteVariant }) => {
 
   const handleSubscribe = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
+    const form = e.currentTarget
+    const formData = new FormData(form)
     const data = Object.fromEntries(formData.entries())
 
     try {
@@ -41,7 +42,7 @@ const Footer = ({ siteVariant }: { siteVariant: SiteVariant }) => {
       }
 
       alert('Thank you for subscribing!')
-      e.currentTarget.reset()
+      form.reset()
     } catch {
       alert('Failed to subscribe')
     }
@@ -76,6 +77,7 @@ const Footer = ({ siteVariant }: { siteVariant: SiteVariant }) => {
                   placeholder="Enter your email"
                   required
                   pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                  maxLength={128}
                 />
                 <Button type="submit">Subscribe</Button>
               </form>

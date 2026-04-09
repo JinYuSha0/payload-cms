@@ -1,4 +1,5 @@
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
+import { unstable_cache } from 'next/cache'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -415,6 +416,133 @@ const buildProductionPageData = (
   }
 }
 
+type CachedFrontendBaseData = {
+  categories: CategoryDoc[]
+  productions: Production[]
+  rootCategories: FrontendRouteContext['categories']
+  contactInformation: ContactInformation
+  countsEntries: Array<[number, number]>
+  childrenByParentEntries: Array<[number, number[]]>
+}
+
+const getCachedFrontendBaseData = unstable_cache(
+  async (): Promise<CachedFrontendBaseData> => {
+    const payload = await getPayload({ config: configPromise })
+    const locale = 'en' as const
+
+    const [categoriesRes, productionsRes, contactInformationRes] = await Promise.all([
+      payload.find({
+        collection: 'categories',
+        pagination: false,
+        depth: 1,
+        select: {
+          documentId: true,
+          name: true,
+          category: true,
+          picture: true,
+          sortOrder: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        draft: false,
+        locale,
+        fallbackLocale: locale,
+        sort: 'sortOrder',
+      }),
+      payload.find({
+        collection: 'productions',
+        pagination: false,
+        depth: 1,
+        select: {
+          documentId: true,
+          name: true,
+          picture: true,
+          content: true,
+          leaf_category: true,
+          sortOrder: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        draft: false,
+        locale,
+        fallbackLocale: locale,
+        sort: 'sortOrder',
+      }),
+      payload.findGlobal({
+        slug: 'contact-information',
+        select: {
+          phone: true,
+          email: true,
+          address: true,
+        },
+        draft: false,
+        locale,
+        fallbackLocale: locale,
+      }),
+    ])
+
+    const categories = (categoriesRes.docs || []) as CategoryDoc[]
+    const productionDocs = (productionsRes.docs || []) as ProductionDoc[]
+
+    const categoryById = new Map<number, CategoryDoc>()
+    const childrenByParent = new Map<number, number[]>()
+
+    for (const category of categories) {
+      categoryById.set(category.id, category)
+    }
+
+    for (const category of categories) {
+      const parentId = getRelationshipId(category.category)
+      if (!parentId) {
+        continue
+      }
+      const existing = childrenByParent.get(parentId) || []
+      existing.push(category.id)
+      childrenByParent.set(parentId, existing)
+    }
+
+    const counts = computeProductionCounts(categories, productionDocs, childrenByParent)
+
+    const productions = productionDocs
+      .map((production) => toProduction(production, counts, categoryById))
+      .sort(bySortOrder)
+
+    const rootCategories = categories
+      .filter((category) => getRelationshipId(category.category) == null)
+      .sort(bySortOrder)
+      .map((category) => ({
+        documentId: getDocumentId(category),
+        name: resolveLocalizedString(category.name),
+        children: (childrenByParent.get(category.id) || [])
+          .map((childId) => categoryById.get(childId))
+          .filter((child): child is CategoryDoc => Boolean(child))
+          .sort(bySortOrder)
+          .map((child) => ({
+            documentId: getDocumentId(child),
+            name: resolveLocalizedString(child.name),
+          })),
+      }))
+
+    const contactGlobal = contactInformationRes as unknown as Record<string, unknown>
+    const contactInformation: ContactInformation = {
+      phone: resolveLocalizedString(contactGlobal.phone),
+      email: resolveLocalizedString(contactGlobal.email),
+      address: resolveLocalizedString(contactGlobal.address),
+    }
+
+    return {
+      categories,
+      productions,
+      rootCategories,
+      contactInformation,
+      countsEntries: [...counts.entries()],
+      childrenByParentEntries: [...childrenByParent.entries()].map(([parentId, childIds]) => [parentId, [...childIds]]),
+    }
+  },
+  ['frontend-route-context-base-v1'],
+  { revalidate: 60 },
+)
+
 const buildBaseContext = async (
   host: string | null | undefined,
 ): Promise<{
@@ -425,92 +553,20 @@ const buildBaseContext = async (
   childrenByParent: Map<number, number[]>
   categoryById: Map<number, CategoryDoc>
 }> => {
-  const payload = await getPayload({ config: configPromise })
-  const locale = 'en' as const
-
-  const [categoriesRes, productionsRes, contactInformationRes] = await Promise.all([
-    payload.find({
-      collection: 'categories',
-      pagination: false,
-      depth: 2,
-      draft: false,
-      locale,
-      fallbackLocale: locale,
-      sort: 'sortOrder',
-      limit: 0,
-    }),
-    payload.find({
-      collection: 'productions',
-      pagination: false,
-      depth: 2,
-      draft: false,
-      locale,
-      fallbackLocale: locale,
-      sort: 'sortOrder',
-      limit: 0,
-    }),
-    payload.findGlobal({
-      slug: 'contact-information',
-      draft: false,
-      locale,
-      fallbackLocale: locale,
-    }),
-  ])
-
-  const categories = (categoriesRes.docs || []) as CategoryDoc[]
-  const productionDocs = (productionsRes.docs || []) as ProductionDoc[]
-
-  const categoryById = new Map<number, CategoryDoc>()
-  const childrenByParent = new Map<number, number[]>()
-
-  for (const category of categories) {
-    categoryById.set(category.id, category)
-  }
-
-  for (const category of categories) {
-    const parentId = getRelationshipId(category.category)
-    if (!parentId) {
-      continue
-    }
-    const existing = childrenByParent.get(parentId) || []
-    existing.push(category.id)
-    childrenByParent.set(parentId, existing)
-  }
-
-  const counts = computeProductionCounts(categories, productionDocs, childrenByParent)
-
-  const productions = productionDocs
-    .map((production) => toProduction(production, counts, categoryById))
-    .sort(bySortOrder)
-
-  const rootCategories = categories
-    .filter((category) => getRelationshipId(category.category) == null)
-    .sort(bySortOrder)
-    .map((category) => ({
-      documentId: getDocumentId(category),
-      name: resolveLocalizedString(category.name),
-      children: (childrenByParent.get(category.id) || [])
-        .map((childId) => categoryById.get(childId))
-        .filter((child): child is CategoryDoc => Boolean(child))
-        .sort(bySortOrder)
-        .map((child) => ({
-          documentId: getDocumentId(child),
-          name: resolveLocalizedString(child.name),
-        })),
-    }))
-
-  const contactGlobal = contactInformationRes as unknown as Record<string, unknown>
-  const contactInformation: ContactInformation = {
-    phone: resolveLocalizedString(contactGlobal.phone),
-    email: resolveLocalizedString(contactGlobal.email),
-    address: resolveLocalizedString(contactGlobal.address),
-  }
+  const cached = await getCachedFrontendBaseData()
+  const categories = cached.categories
+  const productions = cached.productions
+  const counts = new Map<number, number>(cached.countsEntries)
+  const childrenByParent = new Map<number, number[]>(
+    cached.childrenByParentEntries.map(([parentId, childIds]) => [parentId, [...childIds]]),
+  )
+  const categoryById = new Map<number, CategoryDoc>(categories.map((category) => [category.id, category]))
 
   return {
     context: {
       siteVariant: getSiteVariant(host),
-      categories: rootCategories,
-      contactInformation,
+      categories: cached.rootCategories,
+      contactInformation: cached.contactInformation,
     },
     categories,
     productions,
