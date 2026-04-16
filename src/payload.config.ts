@@ -18,9 +18,44 @@ import { ContactInformation } from './globals/ContactInformation'
 import { ReceiveEmail } from './globals/ReceiveEmail'
 import { setRuntimeR2Bucket } from './lib/runtime-bindings'
 
+const normalizeString = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : null
+}
+
+const encodePathSegment = (value: string): string => encodeURIComponent(value)
+
+const buildPrefixedObjectPath = (filename: string, prefix?: string): string => {
+  const normalizedPrefix = normalizeString(prefix)?.replace(/^\/+|\/+$/g, '')
+  const encodedFilename = encodePathSegment(filename)
+
+  if (!normalizedPrefix) {
+    return encodedFilename
+  }
+
+  const encodedPrefix = normalizedPrefix
+    .split('/')
+    .filter(Boolean)
+    .map(encodePathSegment)
+    .join('/')
+
+  return encodedPrefix ? `${encodedPrefix}/${encodedFilename}` : encodedFilename
+}
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
+const mediaPublicOrigin = normalizeString(process.env.MEDIA_PUBLIC_ORIGIN)?.replace(/\/+$/, '')
+const mediaStorageConfig = mediaPublicOrigin
+  ? {
+      generateFileURL: ({ filename, prefix }: { filename: string; prefix?: string }) =>
+        `${mediaPublicOrigin}/${buildPrefixedObjectPath(filename, prefix)}`,
+    }
+  : true
 
 const isCLI = process.argv.some((value) => realpath(value).endsWith(path.join('payload', 'bin.js')))
 const isProduction = process.env.NODE_ENV === 'production'
@@ -79,7 +114,7 @@ export default buildConfig({
   plugins: [
     r2Storage({
       bucket: cloudflare.env.R2,
-      collections: { media: true },
+      collections: { media: mediaStorageConfig },
     }),
   ],
 })
