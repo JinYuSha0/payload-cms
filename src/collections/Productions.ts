@@ -368,27 +368,6 @@ export const Productions: CollectionConfig = {
       unique: true,
     },
     {
-      name: 'slug',
-      type: 'text',
-      unique: true,
-      index: true,
-      admin: {
-        description: 'SEO URL path（可选；优先用于前台产品 URL）',
-      },
-      validate: (value: unknown) => {
-        const normalized = normalizeString(value)
-        if (!normalized) {
-          return true
-        }
-
-        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized)) {
-          return 'slug 仅支持小写字母、数字和短横线'
-        }
-
-        return true
-      },
-    },
-    {
       name: 'picture',
       type: 'upload',
       relationTo: 'media',
@@ -444,6 +423,27 @@ export const Productions: CollectionConfig = {
         components: {
           Field: '/components/admin/ProductionSeoAIGeneratorField',
         },
+      },
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      unique: true,
+      index: true,
+      admin: {
+        description: 'SEO URL path（可选；优先用于前台产品 URL）',
+      },
+      validate: (value: unknown) => {
+        const normalized = normalizeString(value)
+        if (!normalized) {
+          return true
+        }
+
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized)) {
+          return 'slug 仅支持小写字母、数字和短横线'
+        }
+
+        return true
       },
     },
     {
