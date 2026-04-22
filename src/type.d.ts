@@ -49,11 +49,17 @@ export interface LeafCategory {
 export interface Production {
   id: number
   documentId: string
+  slug?: string
+  routeIndex?: string
   createdAt?: string
   updatedAt?: string
   publishedAt?: string
   locale?: string
   name: string
+  intro?: string
+  keywords?: string[]
+  seoTitle?: string
+  seoDescription?: string
   content?: string
   sortOrder?: number
   leaf_category?: LeafCategory
@@ -65,7 +71,11 @@ export interface Production {
 export interface Category {
   id: number
   documentId: string
+  slug?: string
+  routeIndex?: string
   name: string
+  seoTitle?: string
+  seoDescription?: string
   createdAt?: string
   updatedAt?: string
   publishedAt?: string

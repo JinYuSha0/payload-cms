@@ -169,7 +169,7 @@ export interface User {
  */
 export interface Media {
   id: number;
-  alt: string;
+  alt?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -214,6 +214,20 @@ export interface FolderInterface {
 export interface Category {
   id: number;
   name: string;
+  /**
+   * SEO URL path（可选；可用于前台 category URL）
+   */
+  slug?: string | null;
+  /**
+   * 建议 50-60 字符
+   */
+  seoTitle?: string | null;
+  /**
+   * 建议 120-160 字符
+   */
+  seoDescription?: string | null;
+  seoAIGeneratedAt?: string | null;
+  seoAIModel?: string | null;
   category?: (number | null) | Category;
   categories?: {
     docs?: (number | Category)[];
@@ -238,6 +252,10 @@ export interface Category {
 export interface Production {
   id: number;
   name: string;
+  /**
+   * SEO URL path（可选；优先用于前台产品 URL）
+   */
+  slug?: string | null;
   picture?: (number | Media)[] | null;
   content?: {
     root: {
@@ -254,11 +272,23 @@ export interface Production {
     };
     [k: string]: unknown;
   } | null;
+  intro?: string | null;
+  keywords?: string[] | null;
   /**
    * 只能选择叶分类
    */
   leaf_category?: (number | null) | Category;
   sortOrder?: number | null;
+  /**
+   * 建议 50-60 字符
+   */
+  seoTitle?: string | null;
+  /**
+   * 建议 120-160 字符
+   */
+  seoDescription?: string | null;
+  seoAIGeneratedAt?: string | null;
+  seoAIModel?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -425,6 +455,11 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  seoAIGeneratedAt?: T;
+  seoAIModel?: T;
   category?: T;
   categories?: T;
   picture?: T;
@@ -440,10 +475,17 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface ProductionsSelect<T extends boolean = true> {
   name?: T;
+  slug?: T;
   picture?: T;
   content?: T;
+  intro?: T;
+  keywords?: T;
   leaf_category?: T;
   sortOrder?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  seoAIGeneratedAt?: T;
+  seoAIModel?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

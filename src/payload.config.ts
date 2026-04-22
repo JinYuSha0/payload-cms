@@ -16,7 +16,7 @@ import { Contacts } from './collections/Contacts'
 import { Subscribers } from './collections/Subscribers'
 import { ContactInformation } from './globals/ContactInformation'
 import { ReceiveEmail } from './globals/ReceiveEmail'
-import { setRuntimeR2Bucket } from './lib/runtime-bindings'
+import { setRuntimeAI, setRuntimeR2Bucket } from './lib/runtime-bindings'
 
 const normalizeString = (value: unknown): string | null => {
   if (typeof value !== 'string') {
@@ -88,6 +88,7 @@ const cloudflare =
     : await getCloudflareContext({ async: true })
 
 setRuntimeR2Bucket(cloudflare.env.R2)
+setRuntimeAI((cloudflare.env as CloudflareEnv & { AI?: unknown }).AI)
 
 export default buildConfig({
   admin: {

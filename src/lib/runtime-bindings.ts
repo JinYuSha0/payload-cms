@@ -6,7 +6,12 @@ type R2BucketLike = {
   ) => Promise<unknown>
 }
 
+type WorkersAILike = {
+  run: (model: string, input: unknown) => Promise<unknown>
+}
+
 let runtimeR2Bucket: R2BucketLike | null = null
+let runtimeAI: WorkersAILike | null = null
 
 export const setRuntimeR2Bucket = (bucket: unknown): void => {
   if (bucket && typeof (bucket as { put?: unknown }).put === 'function') {
@@ -17,3 +22,13 @@ export const setRuntimeR2Bucket = (bucket: unknown): void => {
 }
 
 export const getRuntimeR2Bucket = (): R2BucketLike | null => runtimeR2Bucket
+
+export const setRuntimeAI = (ai: unknown): void => {
+  if (ai && typeof (ai as { run?: unknown }).run === 'function') {
+    runtimeAI = ai as WorkersAILike
+  } else {
+    runtimeAI = null
+  }
+}
+
+export const getRuntimeAI = (): WorkersAILike | null => runtimeAI

@@ -36,7 +36,7 @@ export function NavMenu({ categories, ...props }: NavMenuProps) {
             return (
               <NavigationMenuItem key={category.documentId}>
                 <Button variant="ghost" asChild>
-                  <Link href={`/category/${category.documentId}`}>{category.name}</Link>
+                  <Link href={`/category/${category.routeIndex}`}>{category.name}</Link>
                 </Button>
               </NavigationMenuItem>
             )
@@ -44,13 +44,13 @@ export function NavMenu({ categories, ...props }: NavMenuProps) {
 
           return (
             <NavigationMenuItem key={category.documentId}>
-              <NavigationMenuTrigger onClick={() => router.push(`/category/${category.documentId}`)}>
+              <NavigationMenuTrigger onClick={() => router.push(`/category/${category.routeIndex}`)}>
                 {category.name}
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-[320px] gap-2 p-3 md:w-[420px] md:grid-cols-2">
                   {category.children.map((child) => (
-                    <ListItem key={child.documentId} title={child.name} href={`/category/${child.documentId}`} />
+                    <ListItem key={child.documentId} title={child.name} href={`/category/${child.routeIndex}`} />
                   ))}
                 </ul>
               </NavigationMenuContent>

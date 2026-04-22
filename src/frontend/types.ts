@@ -4,9 +4,13 @@ export type SiteVariant = 'xinzhuolian' | 'icookingtech'
 
 export type NavCategory = {
   documentId: string
+  slug?: string
+  routeIndex: string
   name: string
   children: Array<{
     documentId: string
+    slug?: string
+    routeIndex: string
     name: string
   }>
 }
@@ -36,6 +40,7 @@ export type CategoryPageData = {
 export type ProductionDetailCategory = {
   id: number
   documentId: string
+  routeIndex: string
   name: string
 }
 
@@ -49,7 +54,12 @@ export type ProductionDetailPicture = {
 export type ProductionDetailData = {
   id: number
   documentId: string
+  slug?: string
   name: string
+  intro?: string
+  keywords?: string[]
+  seoTitle?: string
+  seoDescription?: string
   content: string
   picture?: ProductionDetailPicture[]
   categories?: ProductionDetailCategory[]

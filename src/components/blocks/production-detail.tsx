@@ -80,7 +80,7 @@ const ProductionDetail = ({ data }: { data: ProductionPageData }) => {
     { label: 'Home', to: '/' },
     ...categories.map((category) => ({
       label: category.name,
-      to: `/category/${category.documentId}`,
+      to: `/category/${category.routeIndex || category.documentId}`,
     })),
     { label: production.name },
   ]
@@ -179,9 +179,10 @@ const ProductionDetail = ({ data }: { data: ProductionPageData }) => {
               {recommendedProductions.map((product) => {
                 const imageUrl = product.picture?.[0]?.url
                 const imageError = imageErrors[product.documentId] || false
+                const productionRouteIndex = product.routeIndex || product.slug || String(product.id)
 
                 return (
-                  <Link key={product.documentId} href={`/production/${product.documentId}`} className="group">
+                  <Link key={product.documentId} href={`/production/${productionRouteIndex}`} className="group">
                     <Card className="overflow-hidden hover:shadow-lg transition-all cursor-pointer h-full border hover:border-primary/50">
                       <div className="relative w-full aspect-video overflow-hidden bg-muted">
                         {imageUrl && !imageError ? (

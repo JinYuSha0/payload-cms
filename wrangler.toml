@@ -36,6 +36,9 @@ binding = "R2"
 bucket_name = "payload-cms"
 preview_bucket_name = "payload-cms"
 
+[ai]
+binding = "AI"
+
 # Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"
 # [[r2_buckets]]
 # binding = "NEXT_INC_CACHE_R2_BUCKET"

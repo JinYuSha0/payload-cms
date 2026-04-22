@@ -20,7 +20,7 @@ const Category = ({ data }: { data: CategoryPageData }) => {
     { label: 'Home', to: '/' },
     ...parentCategory.map((category) => ({
       label: category.name,
-      to: `/category/${category.documentId}`,
+      to: `/category/${category.routeIndex || category.slug || category.documentId}`,
     })),
     { label: categoryTree.category.name },
   ]
@@ -57,7 +57,7 @@ const Category = ({ data }: { data: CategoryPageData }) => {
               <h2 className="text-lg font-semibold mb-4 hidden lg:block">Categories</h2>
               <nav className="space-y-1">
                 {categoryTree.children.map((category) => (
-                  <Link key={category.id} href={`/category/${category.documentId}`}>
+                  <Link key={category.id} href={`/category/${category.routeIndex || category.slug || category.documentId}`}>
                     <button className="w-full text-left px-4 py-3 rounded-lg transition-all duration-200 hover:bg-accent hover:text-accent-foreground text-muted-foreground">
                       <div className="flex items-center justify-between">
                         <span className="capitalize">{category.name}</span>
@@ -82,8 +82,9 @@ const Category = ({ data }: { data: CategoryPageData }) => {
                 {productions.map((production) => {
                   const content = extractTextFromHTML(production.content || '')
                   const minutes = Math.max(Math.ceil(content.length / 225), 1)
+                  const productionRouteIndex = production.routeIndex || production.slug || production.documentId
                   return (
-                    <Link key={production.documentId} href={`/production/${production.documentId}`}>
+                    <Link key={production.documentId} href={`/production/${productionRouteIndex}`}>
                       <Card className="mb-6 break-inside-avoid border hover:shadow-md transition-all duration-300 bg-card group overflow-hidden p-0">
                         <div className="w-full aspect-video bg-linear-to-br from-primary/20 via-primary/10 to-primary/5 relative overflow-hidden rounded-t-xl">
                           {production.picture && production.picture.length > 0 ? (

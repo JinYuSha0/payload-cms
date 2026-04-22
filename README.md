@@ -1,3 +1,10 @@
+# 生成迁移
+
+pnpm payload migrate:create # 生成迁移文件到 src/migrations/
+pnpm payload migrate:status # 看待执行迁移
+pnpm payload migrate # 本地执行迁移
+pnpm run generate:types
+
 # Payload Cloudflare Template
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1)

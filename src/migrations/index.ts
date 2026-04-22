@@ -3,6 +3,9 @@ import * as migration_20260227_084506_migrate_strapi_categories_only from './202
 import * as migration_20260402_035217_add_payload_folders_locked_docs_rel from './20260402_035217_add_payload_folders_locked_docs_rel';
 import * as migration_20260409_120000_query_perf_indexes from './20260409_120000_query_perf_indexes';
 import * as migration_20260409_130158_add_contacts_and_subscribers from './20260409_130158_add_contacts_and_subscribers';
+import * as migration_20260416_032342 from './20260416_032342';
+import * as migration_20260422_020000_add_category_and_production_seo_fields from './20260422_020000_add_category_and_production_seo_fields';
+import * as migration_20260422_030000_add_docx_and_seo_ai_support from './20260422_030000_add_docx_and_seo_ai_support';
 
 export const migrations = [
   {
@@ -28,6 +31,21 @@ export const migrations = [
   {
     up: migration_20260409_130158_add_contacts_and_subscribers.up,
     down: migration_20260409_130158_add_contacts_and_subscribers.down,
-    name: '20260409_130158_add_contacts_and_subscribers'
+    name: '20260409_130158_add_contacts_and_subscribers',
+  },
+  {
+    up: migration_20260416_032342.up,
+    down: migration_20260416_032342.down,
+    name: '20260416_032342'
+  },
+  {
+    up: migration_20260422_020000_add_category_and_production_seo_fields.up,
+    down: migration_20260422_020000_add_category_and_production_seo_fields.down,
+    name: '20260422_020000_add_category_and_production_seo_fields',
+  },
+  {
+    up: migration_20260422_030000_add_docx_and_seo_ai_support.up,
+    down: migration_20260422_030000_add_docx_and_seo_ai_support.down,
+    name: '20260422_030000_add_docx_and_seo_ai_support',
   },
 ];

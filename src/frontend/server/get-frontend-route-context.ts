@@ -22,6 +22,12 @@ type ProductionDoc = PayloadProduction & {
   documentId?: string
 }
 
+const PUBLISHED_ONLY_WHERE = {
+  _status: {
+    equals: 'published' as const,
+  },
+}
+
 const asNonEmptyString = (value: unknown): string | null => {
   if (typeof value !== 'string') {
     return null
@@ -48,6 +54,40 @@ const resolveLocalizedString = (value: unknown): string => {
     Object.values(localized).map(asNonEmptyString).find(Boolean) ||
     ''
   )
+}
+
+const normalizeStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => asNonEmptyString(item))
+      .filter((item): item is string => Boolean(item))
+  }
+
+  const single = asNonEmptyString(value)
+  return single ? [single] : []
+}
+
+const resolveLocalizedStringArray = (value: unknown): string[] => {
+  const direct = normalizeStringArray(value)
+  if (direct.length > 0) {
+    return direct
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return []
+  }
+
+  const localized = value as Record<string, unknown>
+  const prioritized = [localized.en, localized.zh, ...Object.values(localized)]
+
+  for (const candidate of prioritized) {
+    const parsed = normalizeStringArray(candidate)
+    if (parsed.length > 0) {
+      return parsed
+    }
+  }
+
+  return []
 }
 
 const getRelationshipId = (value: unknown): number | null => {
@@ -85,6 +125,22 @@ const getRelationshipId = (value: unknown): number | null => {
 
 const getDocumentId = (doc: { id: number; documentId?: unknown }): string => {
   return asNonEmptyString(doc.documentId) || String(doc.id)
+}
+
+const getCategoryRouteIndex = (category: {
+  id: number
+  documentId?: unknown
+  slug?: unknown
+}): string => {
+  return asNonEmptyString(category.slug) || getDocumentId(category)
+}
+
+const getProductionRouteIndex = (production: {
+  id: number
+  documentId?: unknown
+  slug?: unknown
+}): string => {
+  return asNonEmptyString(production.slug) || String(production.id)
 }
 
 const toPicture = (mediaValue: unknown): Picture | null => {
@@ -147,7 +203,11 @@ const toCategory = (category: CategoryDoc, counts: Map<number, number>): Categor
   return {
     id: category.id,
     documentId: getDocumentId(category),
+    slug: asNonEmptyString(category.slug) || undefined,
+    routeIndex: getCategoryRouteIndex(category),
     name: resolveLocalizedString(category.name),
+    seoTitle: resolveLocalizedString(category.seoTitle) || undefined,
+    seoDescription: resolveLocalizedString(category.seoDescription) || undefined,
     createdAt: category.createdAt,
     updatedAt: category.updatedAt,
     publishedAt: category.updatedAt,
@@ -191,11 +251,17 @@ const toProduction = (
   return {
     id: production.id,
     documentId: getDocumentId(production),
+    slug: asNonEmptyString(production.slug) || undefined,
+    routeIndex: getProductionRouteIndex(production),
     createdAt: production.createdAt,
     updatedAt: production.updatedAt,
-    publishedAt: production.updatedAt,
+    publishedAt: production.updatedAt || production.createdAt,
     locale: 'en',
     name: resolveLocalizedString(production.name),
+    intro: resolveLocalizedString(production.intro) || undefined,
+    keywords: resolveLocalizedStringArray(production.keywords),
+    seoTitle: resolveLocalizedString(production.seoTitle) || undefined,
+    seoDescription: resolveLocalizedString(production.seoDescription) || undefined,
     content: lexicalToHTML(production.content),
     sortOrder: production.sortOrder || 0,
     leaf_category: toLeafCategory(leafCategory, counts),
@@ -207,8 +273,42 @@ const bySortOrder = <T extends { sortOrder?: number | null; name?: string }>(a: 
   const sortA = a.sortOrder || 0
   const sortB = b.sortOrder || 0
   if (sortA !== sortB) {
-    return sortA - sortB
+    return sortB - sortA
   }
+  return (a.name || '').localeCompare(b.name || '')
+}
+
+const getPublishedTimestamp = <T extends { publishedAt?: string; updatedAt?: string; createdAt?: string }>(
+  value: T,
+): number => {
+  const timestamp = new Date(value.publishedAt || value.updatedAt || value.createdAt || 0).getTime()
+  return Number.isFinite(timestamp) ? timestamp : 0
+}
+
+const byProductionOrder = <
+  T extends {
+    sortOrder?: number | null
+    publishedAt?: string
+    updatedAt?: string
+    createdAt?: string
+    name?: string
+  },
+>(
+  a: T,
+  b: T,
+): number => {
+  const sortA = a.sortOrder || 0
+  const sortB = b.sortOrder || 0
+  if (sortA !== sortB) {
+    return sortB - sortA
+  }
+
+  const publishedA = getPublishedTimestamp(a)
+  const publishedB = getPublishedTimestamp(b)
+  if (publishedA !== publishedB) {
+    return publishedB - publishedA
+  }
+
   return (a.name || '').localeCompare(b.name || '')
 }
 
@@ -273,6 +373,34 @@ const findByRouteId = <T extends { id: number; documentId?: unknown }>(docs: T[]
   return docs.find((doc) => doc.id === numeric) || null
 }
 
+const findCategoryByRouteId = (categories: CategoryDoc[], routeId: string): CategoryDoc | null => {
+  const bySlug = categories.find((category) => asNonEmptyString(category.slug) === routeId)
+  if (bySlug) {
+    return bySlug
+  }
+
+  return findByRouteId(categories, routeId)
+}
+
+const findProductionByRouteId = (productions: Production[], routeId: string): Production | null => {
+  const bySlug = productions.find((production) => asNonEmptyString(production.slug) === routeId)
+  if (bySlug) {
+    return bySlug
+  }
+
+  const byDocumentId = productions.find((production) => production.documentId === routeId)
+  if (byDocumentId) {
+    return byDocumentId
+  }
+
+  const numeric = Number(routeId)
+  if (!Number.isFinite(numeric)) {
+    return null
+  }
+
+  return productions.find((production) => production.id === numeric) || null
+}
+
 const collectDescendantIDs = (rootId: number, childrenByParent: Map<number, number[]>): Set<number> => {
   const ids = new Set<number>()
   const stack = [rootId]
@@ -317,7 +445,12 @@ const toDetailProduction = (
   return {
     id: production.id,
     documentId: production.documentId,
+    slug: production.slug || undefined,
     name: production.name,
+    intro: production.intro || undefined,
+    keywords: Array.isArray(production.keywords) ? production.keywords : [],
+    seoTitle: production.seoTitle || undefined,
+    seoDescription: production.seoDescription || undefined,
     content: production.content || '',
     picture: (production.picture || []).map((picture) => ({
       id: picture.id,
@@ -328,6 +461,7 @@ const toDetailProduction = (
     categories: categoryChain.map((category) => ({
       id: category.id,
       documentId: getDocumentId(category),
+      routeIndex: getCategoryRouteIndex(category),
       name: resolveLocalizedString(category.name),
     })),
     createdAt: production.createdAt,
@@ -344,7 +478,7 @@ const buildCategoryPageData = (
   childrenByParent: Map<number, number[]>,
   categoryById: Map<number, CategoryDoc>,
 ): CategoryPageData | null => {
-  const categoryDoc = findByRouteId(categories, routeId)
+  const categoryDoc = findCategoryByRouteId(categories, routeId)
   if (!categoryDoc) {
     return null
   }
@@ -355,7 +489,7 @@ const buildCategoryPageData = (
       const leafId = production.leaf_category?.id
       return typeof leafId === 'number' ? descendants.has(leafId) : false
     })
-    .sort(bySortOrder)
+    .sort(byProductionOrder)
 
   const children = (childrenByParent.get(categoryDoc.id) || [])
     .map((childId) => categoryById.get(childId))
@@ -387,10 +521,9 @@ const buildCategoryPageData = (
 const buildProductionPageData = (
   routeId: string,
   productions: Production[],
-  categories: CategoryDoc[],
   categoryById: Map<number, CategoryDoc>,
 ): ProductionPageData => {
-  const production = productions.find((item) => item.documentId === routeId || String(item.id) === routeId)
+  const production = findProductionByRouteId(productions, routeId)
   if (!production) {
     return {
       production: null,
@@ -435,9 +568,13 @@ const getCachedFrontendBaseData = unstable_cache(
         collection: 'categories',
         pagination: false,
         depth: 1,
+        where: PUBLISHED_ONLY_WHERE,
         select: {
           documentId: true,
+          slug: true,
           name: true,
+          seoTitle: true,
+          seoDescription: true,
           category: true,
           picture: true,
           sortOrder: true,
@@ -447,15 +584,21 @@ const getCachedFrontendBaseData = unstable_cache(
         draft: false,
         locale,
         fallbackLocale: locale,
-        sort: 'sortOrder',
+        sort: '-sortOrder',
       }),
       payload.find({
         collection: 'productions',
         pagination: false,
         depth: 1,
+        where: PUBLISHED_ONLY_WHERE,
         select: {
           documentId: true,
+          slug: true,
           name: true,
+          intro: true,
+          keywords: true,
+          seoTitle: true,
+          seoDescription: true,
           picture: true,
           content: true,
           leaf_category: true,
@@ -466,7 +609,7 @@ const getCachedFrontendBaseData = unstable_cache(
         draft: false,
         locale,
         fallbackLocale: locale,
-        sort: 'sortOrder',
+        sort: ['-sortOrder', '-updatedAt'],
       }),
       payload.findGlobal({
         slug: 'contact-information',
@@ -505,13 +648,15 @@ const getCachedFrontendBaseData = unstable_cache(
 
     const productions = productionDocs
       .map((production) => toProduction(production, counts, categoryById))
-      .sort(bySortOrder)
+      .sort(byProductionOrder)
 
     const rootCategories = categories
       .filter((category) => getRelationshipId(category.category) == null)
       .sort(bySortOrder)
       .map((category) => ({
         documentId: getDocumentId(category),
+        slug: asNonEmptyString(category.slug) || undefined,
+        routeIndex: getCategoryRouteIndex(category),
         name: resolveLocalizedString(category.name),
         children: (childrenByParent.get(category.id) || [])
           .map((childId) => categoryById.get(childId))
@@ -519,6 +664,8 @@ const getCachedFrontendBaseData = unstable_cache(
           .sort(bySortOrder)
           .map((child) => ({
             documentId: getDocumentId(child),
+            slug: asNonEmptyString(child.slug) || undefined,
+            routeIndex: getCategoryRouteIndex(child),
             name: resolveLocalizedString(child.name),
           })),
       }))
@@ -539,7 +686,7 @@ const getCachedFrontendBaseData = unstable_cache(
       childrenByParentEntries: [...childrenByParent.entries()].map(([parentId, childIds]) => [parentId, [...childIds]]),
     }
   },
-  ['frontend-route-context-base-v1'],
+  ['frontend-route-context-base-v2'],
   { revalidate: 60 },
 )
 
@@ -615,12 +762,12 @@ export const getProductionRouteContext = async (
   host: string | null | undefined,
   routeId: string,
 ): Promise<FrontendRouteContext> => {
-  const { context, categories, productions, categoryById } = await buildBaseContext(host)
+  const { context, productions, categoryById } = await buildBaseContext(host)
 
   return {
     ...context,
     homeData: null,
     categoryData: null,
-    productionData: buildProductionPageData(routeId, productions, categories, categoryById),
+    productionData: buildProductionPageData(routeId, productions, categoryById),
   }
 }

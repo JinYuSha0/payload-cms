@@ -34,13 +34,13 @@ export function NavigationSheet({
 
           {categories.map((item) => (
             <div key={item.documentId} className="space-y-2">
-              <Link href={`/category/${item.documentId}`} className="block font-semibold">
+              <Link href={`/category/${item.routeIndex}`} className="block font-semibold">
                 {item.name}
               </Link>
               {item.children.length > 0 && (
                 <div className="ml-3 border-l pl-3 space-y-2">
                   {item.children.map((child) => (
-                    <Link key={child.documentId} href={`/category/${child.documentId}`} className="block text-sm">
+                    <Link key={child.documentId} href={`/category/${child.routeIndex}`} className="block text-sm">
                       {child.name}
                     </Link>
                   ))}
