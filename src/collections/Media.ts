@@ -107,6 +107,10 @@ const buildPublicObjectURL = (filename: string): string | null => {
   return `${origin}/${encodeURIComponent(filename)}`
 }
 
+const buildPayloadFileRouteURL = (filename: string): string => {
+  return `/api/media/file/${encodeURIComponent(filename)}`
+}
+
 const extractPayloadFileRouteFilename = (value: string): string | null => {
   const raw = normalizeString(value)
   if (!raw) {
@@ -198,6 +202,20 @@ const extractFilenameFromURL = (value: string): string | null => {
   }
 }
 
+const resolvePayloadFileRouteURL = (data: Record<string, unknown>): string | null => {
+  const rawURL = normalizeString(data.url)
+  const filename =
+    normalizeString(data.filename) ||
+    extractPayloadFileRouteFilename(rawURL || '') ||
+    extractFilenameFromURL(rawURL || '')
+
+  if (!filename) {
+    return rawURL
+  }
+
+  return buildPayloadFileRouteURL(filename)
+}
+
 const resolveThumbnailObjectKey = (data: Record<string, unknown>): string | null => {
   const filename = normalizeString(data.filename) || extractFilenameFromURL(normalizeString(data.url) || '')
   if (!filename) {
@@ -231,6 +249,10 @@ const setThumbnailURLAfterRead: AfterReadHook = ({ doc }) => {
   }
 
   const mutableDoc = doc as Record<string, unknown>
+  const payloadFileRouteURL = resolvePayloadFileRouteURL(mutableDoc)
+  if (payloadFileRouteURL) {
+    mutableDoc.url = payloadFileRouteURL
+  }
   const thumbnailURL = resolveThumbnailURL(mutableDoc)
   if (thumbnailURL) {
     mutableDoc.thumbnailURL = thumbnailURL
@@ -292,6 +314,11 @@ const generateThumbnailAfterChange: AfterChangeHook = async ({ doc }) => {
     )
   }
 
+  const payloadFileRouteURL = resolvePayloadFileRouteURL(mutableDoc)
+  if (payloadFileRouteURL) {
+    mutableDoc.url = payloadFileRouteURL
+  }
+
   return doc
 }
 
@@ -317,5 +344,9 @@ export const Media: CollectionConfig = {
     // These are not supported on Workers yet due to lack of sharp
     crop: false,
     focalPoint: false,
+    modifyResponseHeaders: ({ headers }) => {
+      headers.set('Cache-Control', 'public, max-age=31536000, immutable')
+      return headers
+    },
   },
 }

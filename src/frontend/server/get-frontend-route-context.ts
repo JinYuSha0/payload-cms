@@ -37,6 +37,10 @@ const asNonEmptyString = (value: unknown): string | null => {
   return trimmed.length > 0 ? trimmed : null
 }
 
+const buildPayloadFileRouteURL = (filename: string): string => {
+  return `/api/media/file/${encodeURIComponent(filename)}`
+}
+
 const resolveLocalizedString = (value: unknown): string => {
   const direct = asNonEmptyString(value)
   if (direct) {
@@ -149,8 +153,10 @@ const toPicture = (mediaValue: unknown): Picture | null => {
   }
 
   const media = mediaValue as Media & { documentId?: string }
-  const fullURL = asNonEmptyString(media.url)
-  const thumbnailURL = asNonEmptyString(media.thumbnailURL) || fullURL
+  const fullURL = asNonEmptyString(media.filename)
+    ? buildPayloadFileRouteURL(media.filename)
+    : asNonEmptyString(media.url)
+  const thumbnailURL = fullURL || asNonEmptyString(media.thumbnailURL)
   const displayURL = fullURL || thumbnailURL
 
   if (!displayURL) {

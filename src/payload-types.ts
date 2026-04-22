@@ -252,10 +252,6 @@ export interface Category {
 export interface Production {
   id: number;
   name: string;
-  /**
-   * SEO URL path（可选；优先用于前台产品 URL）
-   */
-  slug?: string | null;
   picture?: (number | Media)[] | null;
   content?: {
     root: {
@@ -279,6 +275,10 @@ export interface Production {
    */
   leaf_category?: (number | null) | Category;
   sortOrder?: number | null;
+  /**
+   * SEO URL path（可选；优先用于前台产品 URL）
+   */
+  slug?: string | null;
   /**
    * 建议 50-60 字符
    */
@@ -475,13 +475,13 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface ProductionsSelect<T extends boolean = true> {
   name?: T;
-  slug?: T;
   picture?: T;
   content?: T;
   intro?: T;
   keywords?: T;
   leaf_category?: T;
   sortOrder?: T;
+  slug?: T;
   seoTitle?: T;
   seoDescription?: T;
   seoAIGeneratedAt?: T;
