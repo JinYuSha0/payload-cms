@@ -3,14 +3,23 @@ import { unstable_cache } from 'next/cache'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
-import type { Category as PayloadCategory, Media, Production as PayloadProduction } from '@/payload-types'
+import type {
+  Blog as PayloadBlog,
+  Category as PayloadCategory,
+  Media,
+  Production as PayloadProduction,
+} from '@/payload-types'
 import type { Category, CategoryTree, LeafCategory, Picture, Production } from '@/type'
 import type {
   CategoryPageData,
   ContactInformation,
   FrontendRouteContext,
+  NewsItem,
+  NewsListPageData,
+  NewsPageData,
   ProductionDetailData,
   ProductionPageData,
+  ProductionsListPageData,
   SiteVariant,
 } from '@/frontend/types'
 
@@ -21,6 +30,16 @@ type CategoryDoc = PayloadCategory & {
 type ProductionDoc = PayloadProduction & {
   documentId?: string
 }
+
+type NewsDoc = PayloadBlog & {
+  documentId?: string
+  featuredImage?: unknown
+}
+
+const NEWS_PAGE_SIZE = 12
+const PRODUCTIONS_PAGE_SIZE = 12
+const HOME_PRODUCTS_SIZE = 12
+const HOME_NEWS_SIZE = 3
 
 const PUBLISHED_ONLY_WHERE = {
   _status: {
@@ -39,6 +58,16 @@ const asNonEmptyString = (value: unknown): string | null => {
 
 const buildPayloadFileRouteURL = (filename: string): string => {
   return `/api/media/file/${encodeURIComponent(filename)}`
+}
+
+const stripHTML = (value: string): string => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+
+const truncateText = (value: string, length: number): string => {
+  if (value.length <= length) {
+    return value
+  }
+
+  return value.slice(0, length).trim()
 }
 
 const resolveLocalizedString = (value: unknown): string => {
@@ -145,6 +174,14 @@ const getProductionRouteIndex = (production: {
   slug?: unknown
 }): string => {
   return asNonEmptyString(production.slug) || String(production.id)
+}
+
+const getNewsRouteIndex = (news: {
+  id: number
+  documentId?: unknown
+  slug?: unknown
+}): string => {
+  return asNonEmptyString(news.slug) || String(news.id)
 }
 
 const toPicture = (mediaValue: unknown): Picture | null => {
@@ -272,6 +309,28 @@ const toProduction = (
     sortOrder: production.sortOrder || 0,
     leaf_category: toLeafCategory(leafCategory, counts),
     picture: pictures,
+  }
+}
+
+const toNews = (news: NewsDoc): NewsItem => {
+  const title = resolveLocalizedString(news.title)
+  const content = lexicalToHTML(news.content)
+  const excerpt = truncateText(stripHTML(content), 180)
+
+  return {
+    id: news.id,
+    documentId: getDocumentId(news),
+    slug: asNonEmptyString(news.slug) || undefined,
+    routeIndex: getNewsRouteIndex(news),
+    title,
+    picture: toPicture(news.featuredImage) || undefined,
+    content,
+    excerpt,
+    seoTitle: resolveLocalizedString(news.seoTitle) || undefined,
+    seoDescription: resolveLocalizedString(news.seoDescription) || undefined,
+    seoKeywords: resolveLocalizedStringArray(news.seoKeywords),
+    createdAt: news.createdAt,
+    updatedAt: news.updatedAt,
   }
 }
 
@@ -405,6 +464,25 @@ const findProductionByRouteId = (productions: Production[], routeId: string): Pr
   }
 
   return productions.find((production) => production.id === numeric) || null
+}
+
+const findNewsByRouteId = (newsItems: NewsItem[], routeId: string): NewsItem | null => {
+  const bySlug = newsItems.find((news) => asNonEmptyString(news.slug) === routeId)
+  if (bySlug) {
+    return bySlug
+  }
+
+  const byDocumentId = newsItems.find((news) => news.documentId === routeId)
+  if (byDocumentId) {
+    return byDocumentId
+  }
+
+  const numeric = Number(routeId)
+  if (!Number.isFinite(numeric)) {
+    return null
+  }
+
+  return newsItems.find((news) => news.id === numeric) || null
 }
 
 const collectDescendantIDs = (rootId: number, childrenByParent: Map<number, number[]>): Set<number> => {
@@ -555,9 +633,28 @@ const buildProductionPageData = (
   }
 }
 
+const buildNewsPageData = (routeId: string, newsItems: NewsItem[]): NewsPageData => {
+  const news = findNewsByRouteId(newsItems, routeId)
+  if (!news) {
+    return {
+      news: null,
+      relatedNews: [],
+      error: 'News not found',
+    }
+  }
+
+  const relatedNews = newsItems.filter((item) => item.documentId !== news.documentId).slice(0, 4)
+
+  return {
+    news,
+    relatedNews,
+  }
+}
+
 type CachedFrontendBaseData = {
   categories: CategoryDoc[]
   productions: Production[]
+  newsItems: NewsItem[]
   rootCategories: FrontendRouteContext['categories']
   contactInformation: ContactInformation
   countsEntries: Array<[number, number]>
@@ -569,7 +666,7 @@ const getCachedFrontendBaseData = unstable_cache(
     const payload = await getPayload({ config: configPromise })
     const locale = 'en' as const
 
-    const [categoriesRes, productionsRes, contactInformationRes] = await Promise.all([
+    const [categoriesRes, productionsRes, newsRes, contactInformationRes] = await Promise.all([
       payload.find({
         collection: 'categories',
         pagination: false,
@@ -617,6 +714,28 @@ const getCachedFrontendBaseData = unstable_cache(
         fallbackLocale: locale,
         sort: ['-sortOrder', '-updatedAt'],
       }),
+      payload.find({
+        collection: 'blogs',
+        pagination: false,
+        depth: 1,
+        where: PUBLISHED_ONLY_WHERE,
+        select: {
+          documentId: true,
+          slug: true,
+          title: true,
+          featuredImage: true,
+          content: true,
+          seoTitle: true,
+          seoDescription: true,
+          seoKeywords: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        draft: false,
+        locale,
+        fallbackLocale: locale,
+        sort: '-createdAt',
+      }),
       payload.findGlobal({
         slug: 'contact-information',
         select: {
@@ -632,6 +751,7 @@ const getCachedFrontendBaseData = unstable_cache(
 
     const categories = (categoriesRes.docs || []) as CategoryDoc[]
     const productionDocs = (productionsRes.docs || []) as ProductionDoc[]
+    const newsDocs = (newsRes.docs || []) as NewsDoc[]
 
     const categoryById = new Map<number, CategoryDoc>()
     const childrenByParent = new Map<number, number[]>()
@@ -655,6 +775,13 @@ const getCachedFrontendBaseData = unstable_cache(
     const productions = productionDocs
       .map((production) => toProduction(production, counts, categoryById))
       .sort(byProductionOrder)
+    const newsItems = newsDocs
+      .map((news) => toNews(news))
+      .sort((a, b) => {
+        const timeA = new Date(a.createdAt || 0).getTime()
+        const timeB = new Date(b.createdAt || 0).getTime()
+        return timeB - timeA
+      })
 
     const rootCategories = categories
       .filter((category) => getRelationshipId(category.category) == null)
@@ -686,22 +813,27 @@ const getCachedFrontendBaseData = unstable_cache(
     return {
       categories,
       productions,
+      newsItems,
       rootCategories,
       contactInformation,
       countsEntries: [...counts.entries()],
       childrenByParentEntries: [...childrenByParent.entries()].map(([parentId, childIds]) => [parentId, [...childIds]]),
     }
   },
-  ['frontend-route-context-base-v2'],
+  ['frontend-route-context-base-v3'],
   { revalidate: 60 },
 )
 
 const buildBaseContext = async (
   host: string | null | undefined,
 ): Promise<{
-  context: Omit<FrontendRouteContext, 'homeData' | 'categoryData' | 'productionData'>
+  context: Omit<
+    FrontendRouteContext,
+    'homeData' | 'categoryData' | 'productionData' | 'productionsListData' | 'newsListData' | 'newsData'
+  >
   categories: CategoryDoc[]
   productions: Production[]
+  newsItems: NewsItem[]
   counts: Map<number, number>
   childrenByParent: Map<number, number[]>
   categoryById: Map<number, CategoryDoc>
@@ -709,6 +841,7 @@ const buildBaseContext = async (
   const cached = await getCachedFrontendBaseData()
   const categories = cached.categories
   const productions = cached.productions
+  const newsItems = cached.newsItems
   const counts = new Map<number, number>(cached.countsEntries)
   const childrenByParent = new Map<number, number[]>(
     cached.childrenByParentEntries.map(([parentId, childIds]) => [parentId, [...childIds]]),
@@ -723,6 +856,7 @@ const buildBaseContext = async (
     },
     categories,
     productions,
+    newsItems,
     counts,
     childrenByParent,
     categoryById,
@@ -730,15 +864,19 @@ const buildBaseContext = async (
 }
 
 export const getHomeRouteContext = async (host: string | null | undefined): Promise<FrontendRouteContext> => {
-  const { context, productions } = await buildBaseContext(host)
+  const { context, productions, newsItems } = await buildBaseContext(host)
 
   return {
     ...context,
     homeData: {
-      products: productions.slice(0, 12),
+      products: productions.slice(0, HOME_PRODUCTS_SIZE),
+      news: newsItems.slice(0, HOME_NEWS_SIZE),
     },
     categoryData: null,
     productionData: null,
+    productionsListData: null,
+    newsListData: null,
+    newsData: null,
   }
 }
 
@@ -761,6 +899,9 @@ export const getCategoryRouteContext = async (
       categoryById,
     ),
     productionData: null,
+    productionsListData: null,
+    newsListData: null,
+    newsData: null,
   }
 }
 
@@ -775,5 +916,89 @@ export const getProductionRouteContext = async (
     homeData: null,
     categoryData: null,
     productionData: buildProductionPageData(routeId, productions, categoryById),
+    productionsListData: null,
+    newsListData: null,
+    newsData: null,
+  }
+}
+
+export const getProductionsListRouteContext = async (
+  host: string | null | undefined,
+  page = 1,
+): Promise<FrontendRouteContext> => {
+  const { context, productions } = await buildBaseContext(host)
+  const total = productions.length
+  const pageCount = total > 0 ? Math.ceil(total / PRODUCTIONS_PAGE_SIZE) : 0
+  const normalizedPage = Number.isFinite(page) ? Math.floor(page) : 1
+  const safePage = pageCount > 0 ? Math.min(Math.max(normalizedPage, 1), pageCount) : 1
+  const start = (safePage - 1) * PRODUCTIONS_PAGE_SIZE
+
+  const productionsListData: ProductionsListPageData = {
+    productions: productions.slice(start, start + PRODUCTIONS_PAGE_SIZE),
+    pagination: {
+      page: safePage,
+      pageSize: PRODUCTIONS_PAGE_SIZE,
+      pageCount,
+      total,
+    },
+  }
+
+  return {
+    ...context,
+    homeData: null,
+    categoryData: null,
+    productionData: null,
+    productionsListData,
+    newsListData: null,
+    newsData: null,
+  }
+}
+
+export const getNewsListRouteContext = async (
+  host: string | null | undefined,
+  page = 1,
+): Promise<FrontendRouteContext> => {
+  const { context, newsItems } = await buildBaseContext(host)
+  const total = newsItems.length
+  const pageCount = total > 0 ? Math.ceil(total / NEWS_PAGE_SIZE) : 0
+  const normalizedPage = Number.isFinite(page) ? Math.floor(page) : 1
+  const safePage = pageCount > 0 ? Math.min(Math.max(normalizedPage, 1), pageCount) : 1
+  const start = (safePage - 1) * NEWS_PAGE_SIZE
+
+  const newsListData: NewsListPageData = {
+    news: newsItems.slice(start, start + NEWS_PAGE_SIZE),
+    pagination: {
+      page: safePage,
+      pageSize: NEWS_PAGE_SIZE,
+      pageCount,
+      total,
+    },
+  }
+
+  return {
+    ...context,
+    homeData: null,
+    categoryData: null,
+    productionData: null,
+    productionsListData: null,
+    newsListData,
+    newsData: null,
+  }
+}
+
+export const getNewsRouteContext = async (
+  host: string | null | undefined,
+  routeId: string,
+): Promise<FrontendRouteContext> => {
+  const { context, newsItems } = await buildBaseContext(host)
+
+  return {
+    ...context,
+    homeData: null,
+    categoryData: null,
+    productionData: null,
+    productionsListData: null,
+    newsListData: null,
+    newsData: buildNewsPageData(routeId, newsItems),
   }
 }

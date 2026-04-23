@@ -7,6 +7,7 @@ import Footer from '@/components/blocks/footer'
 import GalleryBlock from '@/components/blocks/gallery'
 import Hero from '@/components/blocks/hero'
 import Navbar from '@/components/blocks/navbar'
+import NewsBlock from '@/components/blocks/news-block'
 import Section01 from '@/components/blocks/section-01'
 import { getHomeRouteContext } from '@/frontend/server/get-frontend-route-context'
 import { createAbsoluteURL } from '@/frontend/server/seo'
@@ -46,12 +47,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const host = await resolveHost()
   const context = await getHomeRouteContext(host)
+  const productionViewAllHref = '/productions'
 
   return (
     <>
       <Navbar categories={context.categories} siteVariant={context.siteVariant} />
       <Hero />
-      <Articles products={context.homeData?.products || []} />
+      <Articles products={context.homeData?.products || []} viewAllHref={productionViewAllHref} />
+      <NewsBlock news={context.homeData?.news || []} />
       <GalleryBlock />
       <Section01 />
       <Contact contactInformation={context.contactInformation} />

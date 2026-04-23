@@ -12,6 +12,7 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
 import { Productions } from './collections/Productions'
+import { Blogs } from './collections/Blogs'
 import { Contacts } from './collections/Contacts'
 import { Subscribers } from './collections/Subscribers'
 import { ContactInformation } from './globals/ContactInformation'
@@ -62,7 +63,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Categories, Productions, Contacts, Subscribers],
+  collections: [Users, Media, Categories, Productions, Blogs, Contacts, Subscribers],
   globals: [ContactInformation, ReceiveEmail],
   localization: {
     locales: ['en', 'zh'],

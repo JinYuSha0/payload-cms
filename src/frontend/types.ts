@@ -1,4 +1,4 @@
-import type { CategoryTree, Production, Category } from '@/type'
+import type { CategoryTree, Production, Category, Picture } from '@/type'
 
 export type SiteVariant = 'xinzhuolian' | 'icookingtech'
 
@@ -23,6 +23,49 @@ export type ContactInformation = {
 
 export type HomePageData = {
   products: Production[]
+  news: NewsItem[]
+}
+
+export type NewsItem = {
+  id: number
+  documentId: string
+  slug?: string
+  routeIndex: string
+  title: string
+  picture?: Picture
+  content: string
+  excerpt: string
+  seoTitle?: string
+  seoDescription?: string
+  seoKeywords?: string[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export type NewsListPageData = {
+  news: NewsItem[]
+  pagination: {
+    page: number
+    pageSize: number
+    pageCount: number
+    total: number
+  }
+}
+
+export type ProductionsListPageData = {
+  productions: Production[]
+  pagination: {
+    page: number
+    pageSize: number
+    pageCount: number
+    total: number
+  }
+}
+
+export type NewsPageData = {
+  news: NewsItem | null
+  relatedNews: NewsItem[]
+  error?: string
 }
 
 export type CategoryPageData = {
@@ -81,4 +124,7 @@ export type FrontendRouteContext = {
   homeData: HomePageData | null
   categoryData: CategoryPageData | null
   productionData: ProductionPageData | null
+  productionsListData: ProductionsListPageData | null
+  newsListData: NewsListPageData | null
+  newsData: NewsPageData | null
 }

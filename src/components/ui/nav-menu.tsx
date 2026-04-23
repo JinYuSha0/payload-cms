@@ -57,6 +57,11 @@ export function NavMenu({ categories, ...props }: NavMenuProps) {
             </NavigationMenuItem>
           )
         })}
+        <NavigationMenuItem>
+          <Button variant="ghost" asChild>
+            <Link href="/news">News</Link>
+          </Button>
+        </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
   )

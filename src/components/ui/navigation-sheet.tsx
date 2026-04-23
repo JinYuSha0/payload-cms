@@ -48,6 +48,10 @@ export function NavigationSheet({
               )}
             </div>
           ))}
+
+          <Link href="/news" className="inline-block">
+            News
+          </Link>
         </div>
       </SheetContent>
     </Sheet>

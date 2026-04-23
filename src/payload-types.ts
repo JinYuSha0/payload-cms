@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     categories: Category;
     productions: Production;
+    blogs: Blog;
     contacts: Contact;
     subscribers: Subscriber;
     'payload-kv': PayloadKv;
@@ -93,6 +94,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     productions: ProductionsSelect<false> | ProductionsSelect<true>;
+    blogs: BlogsSelect<false> | BlogsSelect<true>;
     contacts: ContactsSelect<false> | ContactsSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -295,6 +297,54 @@ export interface Production {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogs".
+ */
+export interface Blog {
+  id: number;
+  title: string;
+  /**
+   * News 主图（单图）
+   */
+  featuredImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * SEO URL path（可选；优先用于前台 news URL）
+   */
+  slug?: string | null;
+  /**
+   * 建议 50-60 字符
+   */
+  seoTitle?: string | null;
+  /**
+   * 建议 120-160 字符
+   */
+  seoDescription?: string | null;
+  /**
+   * 建议 3-8 个关键词
+   */
+  seoKeywords?: string[] | null;
+  seoAIGeneratedAt?: string | null;
+  seoAIModel?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contacts".
  */
 export interface Contact {
@@ -355,6 +405,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'productions';
         value: number | Production;
+      } | null)
+    | ({
+        relationTo: 'blogs';
+        value: number | Blog;
       } | null)
     | ({
         relationTo: 'contacts';
@@ -484,6 +538,24 @@ export interface ProductionsSelect<T extends boolean = true> {
   slug?: T;
   seoTitle?: T;
   seoDescription?: T;
+  seoAIGeneratedAt?: T;
+  seoAIModel?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogs_select".
+ */
+export interface BlogsSelect<T extends boolean = true> {
+  title?: T;
+  featuredImage?: T;
+  content?: T;
+  slug?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  seoKeywords?: T;
   seoAIGeneratedAt?: T;
   seoAIModel?: T;
   updatedAt?: T;

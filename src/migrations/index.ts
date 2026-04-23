@@ -6,6 +6,7 @@ import * as migration_20260409_130158_add_contacts_and_subscribers from './20260
 import * as migration_20260416_032342 from './20260416_032342';
 import * as migration_20260422_020000_add_category_and_production_seo_fields from './20260422_020000_add_category_and_production_seo_fields';
 import * as migration_20260422_030000_add_docx_and_seo_ai_support from './20260422_030000_add_docx_and_seo_ai_support';
+import * as migration_20260423_010000_add_blogs_collection from './20260423_010000_add_blogs_collection';
 
 export const migrations = [
   {
@@ -47,5 +48,10 @@ export const migrations = [
     up: migration_20260422_030000_add_docx_and_seo_ai_support.up,
     down: migration_20260422_030000_add_docx_and_seo_ai_support.down,
     name: '20260422_030000_add_docx_and_seo_ai_support',
+  },
+  {
+    up: migration_20260423_010000_add_blogs_collection.up,
+    down: migration_20260423_010000_add_blogs_collection.down,
+    name: '20260423_010000_add_blogs_collection',
   },
 ];
