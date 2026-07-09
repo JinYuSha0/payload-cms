@@ -1,80 +1,80 @@
 'use client'
 
-import { Gallery, type GalleryItem } from "@/components/ui/gallery";
+import { Gallery, type GalleryItem } from '@/components/ui/gallery'
 
 // Professional kitchen utensils product catalog
 const kitchenUtensilsItems: GalleryItem[] = [
   {
     id: 1,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_7_N5_A3501_126cb7b45c.jpg?updatedAt=2025-12-01T14%3A11%3A02.949Z",
-    title: "1",
-    alt: "1",
+      'https://img.viteedge.com/thumbnail_7_N5_A3501_126cb7b45c.jpg?updatedAt=2025-12-01T14%3A11%3A02.949Z',
+    title: '1',
+    alt: '1',
   },
   {
     id: 2,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Conveyor_Toaster_db79a17b10.jpg?updatedAt=2025-12-01T14%3A10%3A54.700Z",
-    title: "2",
-    alt: "2",
+      'https://img.viteedge.com/thumbnail_Conveyor_Toaster_db79a17b10.jpg?updatedAt=2025-12-01T14%3A10%3A54.700Z',
+    title: '2',
+    alt: '2',
   },
   {
     id: 3,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Waffle_Maker_671f56fecc.jpg?updatedAt=2025-12-01T14%3A10%3A44.902Z",
-    title: "3",
-    alt: "3",
+      'https://img.viteedge.com/thumbnail_Waffle_Maker_671f56fecc.jpg?updatedAt=2025-12-01T14%3A10%3A44.902Z',
+    title: '3',
+    alt: '3',
   },
   {
     id: 4,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Slice_Toaster_3a68b7c746.jpg?updatedAt=2025-12-01T14%3A10%3A31.937Z",
-    title: "4",
-    alt: "4",
+      'https://img.viteedge.com/thumbnail_Slice_Toaster_3a68b7c746.jpg?updatedAt=2025-12-01T14%3A10%3A31.937Z',
+    title: '4',
+    alt: '4',
   },
   {
     id: 5,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Robertshaw_ecdcca4c7b.jpg?updatedAt=2025-12-01T14%3A10%3A28.092Z",
-    title: "5",
-    alt: "5",
+      'https://img.viteedge.com/thumbnail_Robertshaw_ecdcca4c7b.jpg?updatedAt=2025-12-01T14%3A10%3A28.092Z',
+    title: '5',
+    alt: '5',
   },
   {
     id: 6,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Robertshaw_ecdcca4c7b.jpg?updatedAt=2025-12-01T14%3A10%3A28.092Z",
-    title: "5",
-    alt: "5",
+      'https://img.viteedge.com/thumbnail_Robertshaw_ecdcca4c7b.jpg?updatedAt=2025-12-01T14%3A10%3A28.092Z',
+    title: '5',
+    alt: '5',
   },
   {
     id: 7,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Slice_Toaster_3a68b7c746.jpg?updatedAt=2025-12-01T14%3A10%3A31.937Z",
-    title: "4",
-    alt: "4",
+      'https://img.viteedge.com/thumbnail_Slice_Toaster_3a68b7c746.jpg?updatedAt=2025-12-01T14%3A10%3A31.937Z',
+    title: '4',
+    alt: '4',
   },
   {
     id: 8,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Waffle_Maker_671f56fecc.jpg?updatedAt=2025-12-01T14%3A10%3A44.902Z",
-    title: "3",
-    alt: "3",
+      'https://img.viteedge.com/thumbnail_Waffle_Maker_671f56fecc.jpg?updatedAt=2025-12-01T14%3A10%3A44.902Z',
+    title: '3',
+    alt: '3',
   },
   {
     id: 9,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_Conveyor_Toaster_db79a17b10.jpg?updatedAt=2025-12-01T14%3A10%3A54.700Z",
-    title: "2",
-    alt: "2",
+      'https://img.viteedge.com/thumbnail_Conveyor_Toaster_db79a17b10.jpg?updatedAt=2025-12-01T14%3A10%3A54.700Z',
+    title: '2',
+    alt: '2',
   },
   {
     id: 10,
     image:
-      "https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/thumbnail_7_N5_A3501_126cb7b45c.jpg?updatedAt=2025-12-01T14%3A11%3A02.949Z",
-    title: "1",
-    alt: "1",
+      'https://img.viteedge.com/thumbnail_7_N5_A3501_126cb7b45c.jpg?updatedAt=2025-12-01T14%3A11%3A02.949Z',
+    title: '1',
+    alt: '1',
   },
-];
+]
 
 const GalleryBlock = () => {
   return (
@@ -85,8 +85,8 @@ const GalleryBlock = () => {
             Product Catalog
           </h2>
           <p className="text-muted-foreground text-base sm:text-lg md:text-xl max-w-2xl mx-auto px-4">
-            Comprehensive range of professional-grade kitchen utensils available
-            for bulk orders, custom branding, and wholesale distribution
+            Comprehensive range of professional-grade kitchen utensils available for bulk orders,
+            custom branding, and wholesale distribution
           </p>
         </div>
         <Gallery
@@ -99,7 +99,7 @@ const GalleryBlock = () => {
         />
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default GalleryBlock;
+export default GalleryBlock

@@ -37,34 +37,27 @@ const Section01 = () => {
                 </linearGradient>
               </defs>
             </svg>
-          </span>{" "}
+          </span>{' '}
           we deliver excellence that drives your business forward
         </h1>
 
         <div className="mt-6 sm:mt-12 lg:mt-24 grid grid-cols-3 gap-x-6 gap-y-6 sm:gap-x-10 sm:gap-y-10 lg:gap-y-16 justify-center">
           <div className="max-w-3xs">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-semibold">
-              99.8%
-            </span>
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-semibold">99.8%</span>
             <p className="mt-2 sm:mt-3 lg:mt-6 text-sm sm:text-base lg:text-lg">
               Quality pass rate with rigorous quality control standards
             </p>
           </div>
           <div className="max-w-3xs">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-semibold">
-              98%
-            </span>
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-semibold">98%</span>
             <p className="mt-2 sm:mt-3 lg:mt-6 text-sm sm:text-base lg:text-lg">
               On-time delivery rate across all bulk orders and shipments
             </p>
           </div>
           <div className="max-w-3xs">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-semibold">
-              85%
-            </span>
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-semibold">85%</span>
             <p className="mt-2 sm:mt-3 lg:mt-6 text-sm sm:text-base lg:text-lg">
-              Client retention rate with repeat orders and long-term
-              partnerships
+              Client retention rate with repeat orders and long-term partnerships
             </p>
           </div>
         </div>
@@ -72,12 +65,12 @@ const Section01 = () => {
 
       {/* Image */}
       <img
-        src="https://kitchen-utensils.s3.ap-southeast-1.amazonaws.com/62821ce92c_215617842b.webp"
+        src="https://img.viteedge.com/62821ce92c_215617842b.webp"
         alt="Dishes"
         className="min-h-67 w-full object-cover"
       />
     </section>
-  );
-};
+  )
+}
 
-export default Section01;
+export default Section01
