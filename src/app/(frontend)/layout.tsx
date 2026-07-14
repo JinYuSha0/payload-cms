@@ -2,8 +2,8 @@ import React from 'react'
 import './styles.css'
 
 export const metadata = {
-  description: 'Kitchen utensils frontend powered by Payload CMS and Next.js SSR.',
-  title: 'Kitchen Utensils',
+  description: 'xinzhuolian official',
+  title: 'xinzhuolian',
 }
 
 export default function RootLayout(props: { children: any }) {
