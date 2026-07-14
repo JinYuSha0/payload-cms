@@ -19,7 +19,7 @@ const resolveHost = async (): Promise<string | null> => {
 
 export async function generateMetadata(): Promise<Metadata> {
   const host = await resolveHost()
-  const title = 'Premium Kitchen Utensils Manufacturer'
+  const title = 'xinzhuolian'
   const description =
     'Professional-grade kitchen utensils manufactured to exacting standards for restaurants, hotels, and retailers worldwide.'
   const canonical = createAbsoluteURL('/', host)
